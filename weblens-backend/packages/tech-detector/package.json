@@ -1,0 +1,16 @@
+{
+  "name": "@weblens/tech-detector",
+  "version": "0.0.1",
+  "description": "Signature-based detection of website technology stacks (frameworks, analytics, CMS)",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.1"
+  }
+}

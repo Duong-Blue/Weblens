@@ -1,0 +1,432 @@
+openapi: 3.0.3
+info:
+  title: WebLens API
+  version: 1.0.0
+  description: API for AI Website Audit Platform
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: /
+    description: Current server
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      operationId: authRegister
+      tags:
+        - Auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+      responses:
+        '201':
+          description: Successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request (validation errors)
+  /auth/login:
+    post:
+      summary: Login user
+      operationId: authLogin
+      tags:
+        - Auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '201':
+          description: Logged in successfully. Returns user object and sets access_token cookie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged in successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                description: HTTP-Only JWT token cookie
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /auth/logout:
+    post:
+      summary: Logout user
+      operationId: authLogout
+      tags:
+        - Auth
+      security: []
+      responses:
+        '201':
+          description: Logged out successfully. Clears access_token cookie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+        '400':
+          description: Bad request
+  /auth/refresh:
+    post:
+      summary: Refresh JWT token
+      operationId: authRefresh
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      responses:
+        '201':
+          description: Token refreshed successfully. Sets new access_token cookie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Token refreshed successfully
+        '401':
+          description: Unauthorized
+  /user/profile:
+    get:
+      summary: Get user profile (me)
+      operationId: userProfile
+      tags:
+        - User
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /audits:
+    post:
+      summary: Create a new audit job
+      operationId: createAudit
+      tags:
+        - Audit
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuditDto'
+      responses:
+        '201':
+          description: Audit job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Audit job created successfully
+                  audit:
+                    $ref: '#/components/schemas/Audit'
+        '400':
+          description: Bad request (validation errors)
+        '429':
+          description: Too many requests
+    get:
+      summary: Get user's audits
+      operationId: getMyAudits
+      tags:
+        - Audit
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: A list of audits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Audit'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      totalPages:
+                        type: integer
+        '401':
+          description: Unauthorized
+  /audits/{id}/result:
+    get:
+      summary: Get audit result
+      operationId: getAuditResult
+      tags:
+        - Audit
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Audit and its result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  audit:
+                    $ref: '#/components/schemas/Audit'
+                  result:
+                    $ref: '#/components/schemas/AuditResult'
+                    nullable: true
+        '404':
+          description: Audit not found
+  /audits/{id}/export:
+    get:
+      summary: Export audit result details
+      operationId: exportAuditResult
+      tags:
+        - Audit
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exported audit result data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auditId:
+                    type: string
+                  url:
+                    type: string
+                  date:
+                    type: string
+                    format: date-time
+                  scores:
+                    type: object
+                    properties:
+                      perf:
+                        type: number
+                      seo:
+                        type: number
+                      acc:
+                        type: number
+                      security:
+                        type: number
+                  technology:
+                    type: string
+                  aiSummary:
+                    type: object
+                    properties:
+                      overview:
+                        type: string
+                      strengths:
+                        type: array
+                        items:
+                          type: string
+                      weaknesses:
+                        type: array
+                        items:
+                          type: string
+                      recommendations:
+                        type: array
+                        items:
+                          type: string
+                  details:
+                    type: object
+                    properties:
+                      performance:
+                        type: string
+                      seo:
+                        type: string
+                      accessibility:
+                        type: string
+                      security:
+                        type: string
+                      network:
+                        type: string
+                      structure:
+                        type: string
+                      jsErrors:
+                        type: string
+                      uiUx:
+                        type: string
+        '404':
+          description: Audit or Audit result not found
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    RegisterDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+        name:
+          type: string
+          maxLength: 100
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    CreateAuditDto:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          minLength: 1
+          example: https://example.com
+    Audit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AuditResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        auditId:
+          type: string
+          format: uuid
+        perfScore:
+          type: number
+        seoScore:
+          type: number
+        accScore:
+          type: number
+        securityScore:
+          type: number
+        techStack:
+          type: string
+        aiSummary:
+          type: string
+        perfDetails:
+          type: string
+        seoDetails:
+          type: string
+        accDetails:
+          type: string
+        securityDetails:
+          type: string
+        networkDetails:
+          type: string
+        structureDetails:
+          type: string
+        jsErrorsDetails:
+          type: string
+        uiUxDetails:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

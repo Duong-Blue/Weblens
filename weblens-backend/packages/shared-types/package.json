@@ -1,0 +1,13 @@
+{
+  "name": "@weblens/shared-types",
+  "version": "0.0.1",
+  "description": "Shared TypeScript types and TypeORM entities for the WebLens monorepo",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  }
+}

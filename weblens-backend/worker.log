@@ -1,0 +1,909 @@
+
+> start:dev:worker
+> npm run start:dev --prefix apps/worker
+
+
+> worker@0.0.1 start:dev
+> nest start --watch
+
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+webpack 5.106.2 compiled [1m[32msuccessfully[39m[22m in 25952 ms
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[AiServiceService] [39m[32mInitialized with 3 Gemini API keys.[39m
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (1)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +5ms[39m
+[32m[Nest] 16228  - [39m07/19/2026, 8:33:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +0ms[39m
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:21 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (2)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:24 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (3)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:27 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (4)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:30 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (5)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:33 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (6)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:36 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (7)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:39 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (8)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:42 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (9)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 16228  - [39m07/19/2026, 8:33:42 PM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39mDriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:147647:19[90m)[39m
+    at new MysqlDriver [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:146995:14[90m)[39m
+    at DriverFactory.create [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:128065:24[90m)[39m
+    at new DataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:115777:59[90m)[39m
+    at createTypeormDataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173033:27[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173037:36
+    at Observable._subscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:37147:31[90m)[39m
+    at Observable._trySubscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28821:25[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28815:31
+    at Object.errorContext [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:29492:9[90m)[39m
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+webpack 5.106.2 compiled [1m[32msuccessfully[39m[22m in 21378 ms
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[AiServiceService] [39m[32mInitialized with 3 Gemini API keys.[39m
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (1)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +5ms[39m
+[32m[Nest] 15112  - [39m07/19/2026, 9:13:09 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +0ms[39m
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:12 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (2)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:15 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (3)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:18 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (4)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:21 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (5)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:24 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (6)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:27 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (7)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:30 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (8)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:33 PM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (9)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 15112  - [39m07/19/2026, 9:13:33 PM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39mDriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:147647:19[90m)[39m
+    at new MysqlDriver [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:146995:14[90m)[39m
+    at DriverFactory.create [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:128065:24[90m)[39m
+    at new DataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:115777:59[90m)[39m
+    at createTypeormDataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173033:27[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173037:36
+    at Observable._subscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:37147:31[90m)[39m
+    at Observable._trySubscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28821:25[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28815:31
+    at Object.errorContext [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:29492:9[90m)[39m
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts[39m[22m [1m[32m27:24-56[39m[22m
+[1mModule [1m[31mnot found[39m[22m[1m: [1m[31mError[39m[22m[1m: Can't resolve '@nestjs/event-emitter' in 'D:\_WebLens\weblens-backend\apps\worker\src'[39m[22m
+resolve '@nestjs/event-emitter' in 'D:\_WebLens\weblens-backend\apps\worker\src'
+  Parsed request is a module
+  using description file: D:\_WebLens\weblens-backend\apps\worker\package.json (relative path: ./src)
+    resolve as module
+[1m[31m      D:\_WebLens\weblens-backend\apps\worker\src\node_modules doesn't exist[39m[22m or is not a directory
+      looking for modules in D:\_WebLens\weblens-backend\apps\worker\node_modules
+        single file module
+          using description file: D:\_WebLens\weblens-backend\apps\worker\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            no extension
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+            .tsx
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+            .ts
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+            .js
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+[1m[31m        D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+[1m[31m      D:\_WebLens\weblens-backend\apps\node_modules doesn't exist[39m[22m or is not a directory
+      looking for modules in D:\_WebLens\weblens-backend\node_modules
+        single file module
+          using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            no extension
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+            .tsx
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+            .ts
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+            .js
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+[1m[31m        D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+[1m[31m      D:\_WebLens\node_modules doesn't exist[39m[22m or is not a directory
+[1m[31m      D:\node_modules doesn't exist[39m[22m or is not a directory
+ @ ./src/app.module.ts 18:26-54
+ @ ./src/main.ts 4:21-44
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts:10:31[39m[22m
+TS2307: Cannot find module '@nestjs/event-emitter' or its corresponding type declarations.
+  [0m [90m  8 |[39m [36mimport[39m { [33mRepository[39m } [36mfrom[39m [32m'typeorm'[39m[33m;[39m
+   [90m  9 |[39m [36mimport[39m { [33mAudit[39m[33m,[39m [33mAuditResult[39m } [36mfrom[39m [32m'@weblens/shared-types'[39m[33m;[39m
+  [31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mEventEmitter2[39m } [36mfrom[39m [32m'@nestjs/event-emitter'[39m[33m;[39m
+   [90m    |[39m                               [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 11 |[39m
+   [90m 12 |[39m [33m@[39m[33mProcessor[39m([32m'audit-queue'[39m[33m,[39m { concurrency[33m:[39m [35m5[39m[33m,[39m lockDuration[33m:[39m [35m30000[39m })
+   [90m 13 |[39m [36mexport[39m [36mclass[39m [33mAuditProcessor[39m [36mextends[39m [33mWorkerHost[39m {[0m
+
+webpack 5.106.2 compiled with [1m[31m2 errors[39m[22m in 30582 ms
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts[39m[22m [1m[32m27:24-56[39m[22m
+[1mModule [1m[31mnot found[39m[22m[1m: [1m[31mError[39m[22m[1m: Can't resolve '@nestjs/event-emitter' in 'D:\_WebLens\weblens-backend\apps\worker\src'[39m[22m
+resolve '@nestjs/event-emitter' in 'D:\_WebLens\weblens-backend\apps\worker\src'
+  Parsed request is a module
+  using description file: D:\_WebLens\weblens-backend\apps\worker\package.json (relative path: ./src)
+    resolve as module
+[1m[31m      D:\_WebLens\weblens-backend\apps\worker\src\node_modules doesn't exist[39m[22m or is not a directory
+      looking for modules in D:\_WebLens\weblens-backend\apps\worker\node_modules
+        single file module
+          using description file: D:\_WebLens\weblens-backend\apps\worker\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            no extension
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+            .tsx
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+            .ts
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+            .js
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+[1m[31m        D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+[1m[31m      D:\_WebLens\weblens-backend\apps\node_modules doesn't exist[39m[22m or is not a directory
+      looking for modules in D:\_WebLens\weblens-backend\node_modules
+        single file module
+          using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            no extension
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+            .tsx
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+            .ts
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+            .js
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+[1m[31m        D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+[1m[31m      D:\_WebLens\node_modules doesn't exist[39m[22m or is not a directory
+[1m[31m      D:\node_modules doesn't exist[39m[22m or is not a directory
+ @ ./src/app.module.ts 18:26-54
+ @ ./src/main.ts 4:21-44
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts:10:31[39m[22m
+TS2307: Cannot find module '@nestjs/event-emitter' or its corresponding type declarations.
+  [0m [90m  8 |[39m [36mimport[39m { [33mRepository[39m } [36mfrom[39m [32m'typeorm'[39m[33m;[39m
+   [90m  9 |[39m [36mimport[39m { [33mAudit[39m[33m,[39m [33mAuditResult[39m } [36mfrom[39m [32m'@weblens/shared-types'[39m[33m;[39m
+  [31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mEventEmitter2[39m } [36mfrom[39m [32m'@nestjs/event-emitter'[39m[33m;[39m
+   [90m    |[39m                               [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 11 |[39m
+   [90m 12 |[39m [33m@[39m[33mProcessor[39m([32m'audit-queue'[39m[33m,[39m { concurrency[33m:[39m [35m5[39m[33m,[39m lockDuration[33m:[39m [35m30000[39m })
+   [90m 13 |[39m [36mexport[39m [36mclass[39m [33mAuditProcessor[39m [36mextends[39m [33mWorkerHost[39m {[0m
+
+webpack 5.106.2 compiled with [1m[31m2 errors[39m[22m in 9550 ms
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts[39m[22m [1m[32m27:24-56[39m[22m
+[1mModule [1m[31mnot found[39m[22m[1m: [1m[31mError[39m[22m[1m: Can't resolve '@nestjs/event-emitter' in 'D:\_WebLens\weblens-backend\apps\worker\src'[39m[22m
+resolve '@nestjs/event-emitter' in 'D:\_WebLens\weblens-backend\apps\worker\src'
+  Parsed request is a module
+  using description file: D:\_WebLens\weblens-backend\apps\worker\package.json (relative path: ./src)
+    resolve as module
+[1m[31m      D:\_WebLens\weblens-backend\apps\worker\src\node_modules doesn't exist[39m[22m or is not a directory
+      looking for modules in D:\_WebLens\weblens-backend\apps\worker\node_modules
+        single file module
+          using description file: D:\_WebLens\weblens-backend\apps\worker\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            no extension
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+            .tsx
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+            .ts
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+            .js
+[1m[31m              D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+[1m[31m        D:\_WebLens\weblens-backend\apps\worker\node_modules\@nestjs\event-emitter doesn't exist[39m[22m
+[1m[31m      D:\_WebLens\weblens-backend\apps\node_modules doesn't exist[39m[22m or is not a directory
+      looking for modules in D:\_WebLens\weblens-backend\node_modules
+        single file module
+          using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            no extension
+              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter is not a file
+            .tsx
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+            .ts
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+            .js
+[1m[31m              D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+        existing directory D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter
+          using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+            using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+              no extension
+                D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter is not a file
+              .tsx
+[1m[31m                D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.tsx doesn't exist[39m[22m
+              .ts
+[1m[31m                D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.ts doesn't exist[39m[22m
+              .js
+[1m[31m                D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter.js doesn't exist[39m[22m
+              as directory
+                existing directory D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter
+                  using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter)
+                    using path: D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter\index
+                      using description file: D:\_WebLens\weblens-backend\package.json (relative path: ./node_modules/@nestjs/event-emitter/index)
+                        no extension
+[1m[31m                          D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter\index doesn't exist[39m[22m
+                        .tsx
+[1m[31m                          D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter\index.tsx doesn't exist[39m[22m
+                        .ts
+[1m[31m                          D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter\index.ts doesn't exist[39m[22m
+                        .js
+[1m[31m                          D:\_WebLens\weblens-backend\node_modules\@nestjs\event-emitter\index.js doesn't exist[39m[22m
+[1m[31m      D:\_WebLens\node_modules doesn't exist[39m[22m or is not a directory
+[1m[31m      D:\node_modules doesn't exist[39m[22m or is not a directory
+ @ ./src/app.module.ts 18:26-54
+ @ ./src/main.ts 4:21-44
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts:10:31[39m[22m
+TS2307: Cannot find module '@nestjs/event-emitter' or its corresponding type declarations.
+  [0m [90m  8 |[39m [36mimport[39m { [33mRepository[39m } [36mfrom[39m [32m'typeorm'[39m[33m;[39m
+   [90m  9 |[39m [36mimport[39m { [33mAudit[39m[33m,[39m [33mAuditResult[39m } [36mfrom[39m [32m'@weblens/shared-types'[39m[33m;[39m
+  [31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mEventEmitter2[39m } [36mfrom[39m [32m'@nestjs/event-emitter'[39m[33m;[39m
+   [90m    |[39m                               [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 11 |[39m
+   [90m 12 |[39m [33m@[39m[33mProcessor[39m([32m'audit-queue'[39m[33m,[39m { concurrency[33m:[39m [35m5[39m[33m,[39m lockDuration[33m:[39m [35m30000[39m })
+   [90m 13 |[39m [36mexport[39m [36mclass[39m [33mAuditProcessor[39m [36mextends[39m [33mWorkerHost[39m {[0m
+
+webpack 5.106.2 compiled with [1m[31m2 errors[39m[22m in 9416 ms
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts:10:31[39m[22m
+TS2307: Cannot find module '@nestjs/event-emitter' or its corresponding type declarations.
+  [0m [90m  8 |[39m [36mimport[39m { [33mRepository[39m } [36mfrom[39m [32m'typeorm'[39m[33m;[39m
+   [90m  9 |[39m [36mimport[39m { [33mAudit[39m[33m,[39m [33mAuditResult[39m } [36mfrom[39m [32m'@weblens/shared-types'[39m[33m;[39m
+  [31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mEventEmitter2[39m } [36mfrom[39m [32m'@nestjs/event-emitter'[39m[33m;[39m
+   [90m    |[39m                               [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 11 |[39m
+   [90m 12 |[39m [33m@[39m[33mProcessor[39m([32m'audit-queue'[39m[33m,[39m { concurrency[33m:[39m [35m5[39m[33m,[39m lockDuration[33m:[39m [35m30000[39m })
+   [90m 13 |[39m [36mexport[39m [36mclass[39m [33mAuditProcessor[39m [36mextends[39m [33mWorkerHost[39m {[0m
+
+webpack 5.106.2 compiled with [1m[31m1 error[39m[22m in 6422 ms
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+[1m[31mERROR[39m[22m in [1m./src/audit-processor.ts:67:16[39m[22m
+TS2339: Property 'eventEmitter' does not exist on type 'AuditProcessor'.
+  [0m [90m 65 |[39m       [36mif[39m (anonymous) {
+   [90m 66 |[39m           [36mthis[39m[33m.[39mlogger[33m.[39mlog([32m`[Job ${job.id}] Anonymous audit completed, emitting results via event.`[39m)[33m;[39m
+  [31m[1m>[22m[39m[90m 67 |[39m           [36mthis[39m[33m.[39meventEmitter[33m.[39memit([32m'audit.completed'[39m[33m,[39m { auditId[33m,[39m result[33m:[39m resultData })[33m;[39m
+   [90m    |[39m                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 68 |[39m       } [36melse[39m {
+   [90m 69 |[39m         [36mconst[39m newResult [33m=[39m [36mthis[39m[33m.[39mauditResultRepository[33m.[39mcreate({
+   [90m 70 |[39m             audit[33m:[39m { id[33m:[39m auditId }[33m,[39m[0m
+
+webpack 5.106.2 compiled with [1m[31m1 error[39m[22m in 5978 ms
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+webpack 5.106.2 compiled [1m[32msuccessfully[39m[22m in 5677 ms
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[AiServiceService] [39m[32mInitialized with 3 Gemini API keys.[39m
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (1)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 2536  - [39m07/20/2026, 1:22:04 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +1ms[39m
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:07 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (2)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:10 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (3)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:13 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (4)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:16 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (5)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:19 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (6)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:22 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (7)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:25 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (8)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:28 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (9)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 2536  - [39m07/20/2026, 1:22:28 AM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39mDriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:147647:19[90m)[39m
+    at new MysqlDriver [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:146995:14[90m)[39m
+    at DriverFactory.create [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:128065:24[90m)[39m
+    at new DataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:115777:59[90m)[39m
+    at createTypeormDataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173033:27[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173037:36
+    at Observable._subscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:37147:31[90m)[39m
+    at Observable._trySubscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28821:25[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28815:31
+    at Object.errorContext [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:29492:9[90m)[39m
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+webpack 5.106.2 compiled [1m[32msuccessfully[39m[22m in 9780 ms
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[AiServiceService] [39m[32mInitialized with 3 Gemini API keys.[39m
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (1)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +5ms[39m
+[32m[Nest] 5344  - [39m07/20/2026, 1:33:27 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +1ms[39m
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:31 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (2)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:34 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (3)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:37 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (4)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:40 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (5)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:43 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (6)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:46 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (7)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:49 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (8)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:52 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (9)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 5344  - [39m07/20/2026, 1:33:52 AM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39mDriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:147647:19[90m)[39m
+    at new MysqlDriver [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:146995:14[90m)[39m
+    at DriverFactory.create [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:128065:24[90m)[39m
+    at new DataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:115777:59[90m)[39m
+    at createTypeormDataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173033:27[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173037:36
+    at Observable._subscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:37147:31[90m)[39m
+    at Observable._trySubscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28821:25[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28815:31
+    at Object.errorContext [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:29492:9[90m)[39m
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+webpack 5.106.2 compiled [1m[32msuccessfully[39m[22m in 12294 ms
+
+[48;2;60;190;100m[1m[38;2;0;0;0m Info [39m[22m[49m Webpack is building your sources...
+
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[AiServiceService] [39m[32mInitialized with 3 Gemini API keys.[39m
+[31m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (1)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +9ms[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +5ms[39m
+[32m[Nest] 19220  - [39m07/20/2026, 3:23:33 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +0ms[39m
+[31m[Nest] 19220  - [39m07/20/2026, 3:23:36 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (2)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+webpack 5.106.2 compiled [1m[32msuccessfully[39m[22m in 8183 ms
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[AiServiceService] [39m[32mInitialized with 3 Gemini API keys.[39m
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (1)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 19296  - [39m07/20/2026, 3:23:41 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mBullModule dependencies initialized[39m[38;5;3m +1ms[39m
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:44 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (2)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:47 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (3)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:50 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (4)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:53 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (5)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:56 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (6)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:23:59 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (7)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:24:02 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (8)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:24:05 AM [31m  ERROR[39m [38;5;3m[TypeOrmModule] [39m[31mUnable to connect to the database. Retrying (9)...[39m
+DriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:147647:19)
+    at new MysqlDriver (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:146995:14)
+    at DriverFactory.create (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:128065:24)
+    at new DataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:115777:59)
+    at createTypeormDataSource (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173033:27)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:173037:36
+    at Observable._subscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:37147:31)
+    at Observable._trySubscribe (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28821:25)
+    at D:\_WebLens\weblens-backend\apps\worker\dist\main.js:28815:31
+    at Object.errorContext (D:\_WebLens\weblens-backend\apps\worker\dist\main.js:29492:9)
+[31m[Nest] 19296  - [39m07/20/2026, 3:24:05 AM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39mDriverPackageNotInstalledError: Mysql package has not been found installed. Please run "npm install mysql2".
+    at MysqlDriver.loadDependencies [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:147647:19[90m)[39m
+    at new MysqlDriver [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:146995:14[90m)[39m
+    at DriverFactory.create [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:128065:24[90m)[39m
+    at new DataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:115777:59[90m)[39m
+    at createTypeormDataSource [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173033:27[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:173037:36
+    at Observable._subscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:37147:31[90m)[39m
+    at Observable._trySubscribe [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28821:25[90m)[39m
+    at [90mD:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:28815:31
+    at Object.errorContext [90m(D:\_WebLens\weblens-backend\apps\worker\[39mdist\main.js:29492:9[90m)[39m

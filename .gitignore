@@ -1,0 +1,22 @@
+# Git ignored files and directories
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+build/
+coverage/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# OpenCode / AI Agent specific
+.omo/
+AGENTS.md
+.doc/
+.playwright-mcp/
+"D\357\200\272_WebLensweblens-backend.omonotepadsunauthenticated-auditanalysis.md"
+
+# Project specific
+reports/

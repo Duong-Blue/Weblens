@@ -1,0 +1,27 @@
+{
+  "name": "weblens-backend",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "start:dev:api": "npm run start:dev --prefix apps/api",
+    "start:dev:worker": "npm run start:dev --prefix apps/worker"
+  },
+  "packageManager": "npm@10.9.8",
+  "dependencies": {
+    "@nestjs/config": "^4.0.4",
+    "@types/cookie-parser": "^1.4.10",
+    "chromium-bidi": "^17.0.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "helmet": "^8.3.0",
+    "mysql2": "^3.23.1",
+    "playwright": "^1.49.1",
+    "playwright-core": "^1.49.1",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^1.1.0"
+  }
+}
