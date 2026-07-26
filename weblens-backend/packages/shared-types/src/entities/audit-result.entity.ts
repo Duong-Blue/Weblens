@@ -1,6 +1,3 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
-import { Audit } from './audit.entity';
-
 export interface PerfDetails {
   loadTimeMs: number;
   timing: any;
@@ -118,70 +115,43 @@ export interface UiUxDetails {
   hasNavigation: boolean;
 }
 
-@Entity()
-export class AuditResult {
-  @PrimaryGeneratedColumn('uuid')
+export interface AuditResult {
   id: string;
-
-  @Column()
   auditId: string;
-
-  @OneToOne(() => Audit)
-  @JoinColumn({ name: 'auditId' })
-  audit: Audit;
+  audit: any; // Keep loosely typed if needed, or remove if unused, but per instructions don't change fields. We'll use any as Audit entity was removed.
 
   // 1. Performance
-  @Column({ default: 0 })
   perfScore: number;
-
-  @Column('json', { nullable: true })
   perfDetails: PerfDetails | null;
 
   // 2. SEO
-  @Column({ default: 0 })
   seoScore: number;
-
-  @Column('json', { nullable: true })
   seoDetails: SeoDetails | null;
 
   // 3. Accessibility
-  @Column({ default: 0 })
   accScore: number;
-
-  @Column('json', { nullable: true })
   accDetails: AccDetails | null;
 
   // 4. Security
-  @Column({ default: 0 })
   securityScore: number;
-
-  @Column('json', { nullable: true })
   securityDetails: SecurityDetails | null;
 
   // 5. Technology Stack
-  @Column('json', { nullable: true })
   techStack: TechStack | null;
 
   // 6. Network & Resources
-  @Column('json', { nullable: true })
   networkDetails: NetworkDetails | null;
 
   // 7. Website Structure
-  @Column('json', { nullable: true })
   structureDetails: StructureDetails | null;
 
   // 8. JavaScript & Errors
-  @Column('json', { nullable: true })
   jsErrorsDetails: JsErrorsDetails | null;
 
   // 9. UI/UX (AI Analysis)
-  @Column('json', { nullable: true })
   uiUxDetails: UiUxDetails | null;
 
   // 10. AI Insights & Recommendations
-  @Column('text', { nullable: true })
   aiSummary: string | null;
-
-  @Column('text', { nullable: true })
   summary: string | null; // Keep for backward compatibility if needed temporarily
 }

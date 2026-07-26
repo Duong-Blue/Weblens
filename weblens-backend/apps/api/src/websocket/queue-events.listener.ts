@@ -1,9 +1,6 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { QueueEvents } from 'bullmq';
 import { AppGateway } from './app.gateway';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Audit } from '@weblens/shared-types';
 
 @Injectable()
 export class QueueEventsListener implements OnModuleInit {
@@ -11,7 +8,6 @@ export class QueueEventsListener implements OnModuleInit {
 
   constructor(
     private appGateway: AppGateway,
-    @InjectRepository(Audit) private auditRepository: Repository<Audit>,
   ) {}
 
   onModuleInit() {

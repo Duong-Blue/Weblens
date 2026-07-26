@@ -2,11 +2,15 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { CrawlerService } from './crawler/crawler.service';
-import { AuditLogicService } from '@weblens/audit-engine';
+import { AuditLogicService, ScoringService, EngineScore } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Audit, AuditResult } from '@weblens/shared-types';
+import { AxeRunnerService } from '../../../src/audit/accessibility/axe-runner.service';
+import { WcagMapperService } from '../../../src/audit/accessibility/wcag-mapper.service';
+import { HeaderCheckerService } from '../../../src/audit/security/header-checker.service';
+import { TlsValidatorService } from '../../../src/audit/security/tls-validator.service';
+import { SecurityMapperService } from '../../../src/audit/security/security-mapper.service';
+import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
+import { TechDetectorService } from '../../../src/audit/technology/tech-detector.service';
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
 export class AuditProcessor extends WorkerHost {
@@ -16,8 +20,13 @@ export class AuditProcessor extends WorkerHost {
     private readonly crawlerService: CrawlerService,
     private readonly auditLogicService: AuditLogicService,
     private readonly aiService: AiServiceService,
-    @InjectRepository(Audit) private auditRepository: Repository<Audit>,
-    @InjectRepository(AuditResult) private auditResultRepository: Repository<AuditResult>,
+    private readonly axeRunnerService: AxeRunnerService,
+    private readonly wcagMapperService: WcagMapperService,
+    private readonly headerCheckerService: HeaderCheckerService,
+    private readonly tlsValidatorService: TlsValidatorService,
+    private readonly securityMapperService: SecurityMapperService,
+    private readonly htmlCssMapperService: HtmlCssMapperService,
+    private readonly techDetectorService: TechDetectorService,
   ) {
     super();
   }
@@ -32,7 +41,7 @@ export class AuditProcessor extends WorkerHost {
 
 
       if (!anonymous) {
-          await this.auditRepository.update(auditId, { status: 'crawling' });
+          // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
       }
       await job.updateProgress({ auditId, step: 'crawling', progress: 10, data: null });
 
@@ -42,11 +51,57 @@ export class AuditProcessor extends WorkerHost {
 
       this.logger.debug(`[Job ${job.id}] Step 2: Starting analysis...`);
       if (!anonymous) {
-        await this.auditRepository.update(auditId, { status: 'analyzing' });
+         // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
       }
 
       const comprehensiveAuditData = await this.auditLogicService.performComprehensiveAudit(crawlData, url);
-      this.logger.debug(`[Job ${job.id}] Step 2 Complete: Analysis finished successfully`);
+      
+      this.logger.debug(`[Job ${job.id}] Step 2.5: Running accessibility audit...`);
+      const accessibilityResults = await this.axeRunnerService.runAxeOnHtml(crawlData.htmlContent);
+      const mappedAccessibilityIssues = await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
+      (comprehensiveAuditData as any).accessibility = mappedAccessibilityIssues;
+      
+      this.logger.debug(`[Job ${job.id}] Step 2.6: Running security audit...`);
+      const headers = (crawlData as any).headers || {};
+      const tlsInfo = (crawlData as any).tlsInfo || null;
+      
+      const headerResults = this.headerCheckerService.checkSecurityHeaders(headers);
+      const tlsResults = this.tlsValidatorService.checkTLS(tlsInfo);
+      
+      const allSecurityIssues = [...headerResults, ...tlsResults];
+      const securityScoreResult = this.securityMapperService.calculateSecurityScore(allSecurityIssues);
+      
+      (comprehensiveAuditData as any).securityScore = securityScoreResult.score;
+      (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
+      (comprehensiveAuditData as any).securityMozillaGrade = securityScoreResult.mozillaResult.grade;
+
+      this.logger.debug(`[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`);
+      const htmlCssResult = this.htmlCssMapperService.processHtmlCssAudit(crawlData);
+
+      (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
+      (comprehensiveAuditData as any).htmlIssues = htmlCssResult.issues.filter(i => i.id.startsWith('HTML-'));
+      (comprehensiveAuditData as any).cssScore = htmlCssResult.cssScore;
+      (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(i => i.id.startsWith('CSS-'));
+
+      this.logger.debug(`[Job ${job.id}] Step 2.7.5: Detecting technology stack...`);
+      const technologies = this.techDetectorService.detect(crawlData as any);
+      (comprehensiveAuditData as any).technologies = technologies;
+
+      this.logger.debug(`[Job ${job.id}] Step 2.8: Calculating Final Scores...`);
+      
+      const engineScores: EngineScore[] = [];
+      
+      if ((comprehensiveAuditData as any).seoIssues) {
+        engineScores.push(ScoringService.calculateEngineScore('seo', (comprehensiveAuditData as any).seoIssues));
+      }
+      
+      const overallResult = ScoringService.calculateOverallScore(engineScores);
+      (comprehensiveAuditData as any).overallScore = overallResult.overallScore;
+      (comprehensiveAuditData as any).scoreLabel = overallResult.label;
+      (comprehensiveAuditData as any).scoreColor = overallResult.color;
+      (comprehensiveAuditData as any).scoreBreakdown = overallResult.breakdown;
+
+      this.logger.debug(`[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`);
       await job.updateProgress({ auditId, step: 'analyzed', progress: 70, data: comprehensiveAuditData });
 
       this.logger.debug(`[Job ${job.id}] Step 3: Generating AI Summary...`);
@@ -68,21 +123,16 @@ export class AuditProcessor extends WorkerHost {
           this.logger.log(`[Job ${job.id}] Anonymous audit completed, emitting results via job progress.`);
           await job.updateProgress({ auditId, step: 'completed', progress: 100, data: resultData });
       } else {
-        const newResult = this.auditResultRepository.create({
-            audit: { id: auditId },
-            ...resultData,
-        });
-        await this.auditResultRepository.save(newResult);
-        await this.auditRepository.update(auditId, { status: 'completed' });
+        // Storage of results logic needs to be migrated to Redis
         this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
-        await job.updateProgress({ auditId, step: 'completed', progress: 100, data: JSON.parse(JSON.stringify(newResult)) });
+        await job.updateProgress({ auditId, step: 'completed', progress: 100, data: JSON.parse(JSON.stringify(resultData)) });
       }
 
       return { success: true, result: resultData };
     } catch (error: any) {
       this.logger.error(`[Job ${job.id}] Audit failed for ${url}:`, error);
       if (!anonymous) {
-        await this.auditRepository.update(auditId, { status: 'failed' });
+        // Status updates logic needs to be migrated to Redis
       }
       await job.updateProgress({ 
         auditId, 

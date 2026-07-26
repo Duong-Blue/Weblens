@@ -57,7 +57,7 @@ export function getCWVRecommendation(metric: string, status: string): string {
 }
 
 export function evaluateCWVRules(crawlData: CrawlResult): any[] {
-  const issues = [];
+  const issues: any[] = [];
   const cwv = crawlData.cwv || {};
   
   issues.push(checkCoreWebVital('lcp', cwv.lcp, 'Largest Contentful Paint'));

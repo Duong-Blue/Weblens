@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
 import { AuditModule } from './audit/audit.module';
-import { Audit, AuditResult, User } from '@weblens/shared-types';
 import { AppGateway } from './websocket/app.gateway';
 import { QueueEventsListener } from './websocket/queue-events.listener';
+import { RedisModule } from './redis/redis.module';
 
 import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
@@ -21,16 +18,6 @@ import { ExpressAdapter } from '@bull-board/express';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '../../.env', // Point to the root .env file of the monorepo
-    }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '3306', 10),
-      username: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_NAME || 'weblens',
-      entities: [User, Audit, AuditResult],
-      synchronize: true, // TODO: set to false in production
     }),
     BullModule.forRoot({
       connection: {
@@ -46,8 +33,7 @@ import { ExpressAdapter } from '@bull-board/express';
       ttl: 60000,
       limit: 100, // 100 requests per minute
     }]),
-    AuthModule,
-    UserModule,
+    RedisModule,
     AuditModule,
   ],
   controllers: [AppController],

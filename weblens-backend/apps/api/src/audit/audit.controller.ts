@@ -14,13 +14,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Throttle } from '@nestjs/throttler';
-import { Audit, AuditResult, User } from '@weblens/shared-types';
+// import { Audit, AuditResult, User } from '@weblens/shared-types';
 import { CreateAuditDto } from './dto/create-audit.dto';
 import type { Request } from 'express';
 import { randomUUID } from 'crypto';
+import { RedisService } from '../redis/redis.service';
 
 @Controller('audits')
 export class AuditController {
@@ -28,11 +27,8 @@ export class AuditController {
 
   constructor(
     @InjectQueue('audit-queue') private readonly auditQueue: Queue,
-    @InjectRepository(Audit) private auditRepository: Repository<Audit>,
-    @InjectRepository(AuditResult)
-    private auditResultRepository: Repository<AuditResult>,
-    @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private redisService: RedisService,
   ) {}
 
   @Post()
@@ -40,7 +36,7 @@ export class AuditController {
   async createAudit(
     @Body() body: CreateAuditDto,
     @Req() req: Request,
-  ): Promise<{ message: string; audit: Audit }> {
+  ): Promise<{ message: string; audit: any }> {
     let formattedUrl = body.url.trim();
     if (
       !formattedUrl.startsWith('http://') &&
@@ -51,89 +47,25 @@ export class AuditController {
 
     this.logger.log(`Received audit request for URL: ${formattedUrl}`);
 
-    let userId: string | undefined = undefined;
-    const token = (req.cookies as Record<string, string>)?.access_token;
-    if (token) {
-      try {
-        const payload = await this.jwtService.verifyAsync<{ sub: string }>(
-          token,
-          {
-            secret: process.env.JWT_SECRET || 'secret',
-          },
-        );
-        userId = payload.sub;
+    const generatedId = randomUUID();
+    this.logger.log(`Created anonymous audit object with ID: ${generatedId}`);
 
-        if (userId) {
-          const userExists = await this.userRepository.findOne({
-            where: { id: userId },
-          });
-          if (!userExists) {
-            this.logger.debug(
-              `User ID ${userId} from token not found in database, treating as anonymous`,
-            );
-            userId = undefined;
-          }
-        }
-      } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : 'Unknown error';
-        this.logger.debug(`Token invalid, treating as anonymous: ${message}`);
-        userId = undefined;
-      }
-    }
-
-    if (body.anonymous) {
-      const generatedId = randomUUID();
-      this.logger.log(`Created anonymous audit object with ID: ${generatedId}`);
-
-      const partialAudit = {
-        id: generatedId,
-        url: formattedUrl,
-        userId: undefined,
-        status: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      await this.auditQueue.add(
-        'process-audit',
-        {
-          auditId: generatedId,
-          url: formattedUrl,
-          userId: undefined,
-          anonymous: true,
-        },
-        {
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 5000,
-          },
-          removeOnComplete: true,
-          removeOnFail: false,
-        },
-      );
-      this.logger.log(`Added anonymous audit job ${generatedId} to queue`);
-
-      return {
-        message: 'Anonymous audit job created successfully',
-        audit: partialAudit as unknown as Audit,
-      };
-    }
-
-    const audit = this.auditRepository.create({
+    const partialAudit = {
+      id: generatedId,
       url: formattedUrl,
-      userId: userId,
+      userId: undefined,
       status: 'pending',
-    });
-    const savedAudit = await this.auditRepository.save(audit);
-    this.logger.log(`Created audit record in DB with ID: ${savedAudit.id}`);
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
     await this.auditQueue.add(
       'process-audit',
       {
-        auditId: savedAudit.id,
-        url: savedAudit.url,
-        userId: userId,
+        auditId: generatedId,
+        url: formattedUrl,
+        userId: undefined,
+        anonymous: true,
       },
       {
         attempts: 3,
@@ -141,15 +73,15 @@ export class AuditController {
           type: 'exponential',
           delay: 5000,
         },
-        removeOnComplete: true, // Optional: keep redis clean
-        removeOnFail: false, // Keep failed jobs for inspection
+        removeOnComplete: true,
+        removeOnFail: false,
       },
     );
-    this.logger.log(`Added audit job ${savedAudit.id} to queue`);
+    this.logger.log(`Added anonymous audit job ${generatedId} to queue`);
 
     return {
-      message: 'Audit job created successfully',
-      audit: savedAudit,
+      message: 'Anonymous audit job created successfully',
+      audit: partialAudit,
     };
   }
 
@@ -162,22 +94,15 @@ export class AuditController {
   ) {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
-    const skip = (pageNum - 1) * limitNum;
-
-    const [items, total] = await this.auditRepository.findAndCount({
-      where: { userId: req.user.sub },
-      order: { createdAt: 'DESC' },
-      skip,
-      take: limitNum,
-    });
-
+    
+    // Needs to be migrated to Redis
     return {
-      data: items,
+      data: [],
       meta: {
-        total,
+        total: 0,
         page: pageNum,
         limit: limitNum,
-        totalPages: Math.ceil(total / limitNum),
+        totalPages: 0,
       },
     };
   }
@@ -185,86 +110,30 @@ export class AuditController {
   @Get(':id/result')
   async getAuditResult(
     @Param('id') id: string,
-  ): Promise<{ audit: Audit; result: AuditResult | null }> {
-    const audit = await this.auditRepository.findOne({
-      where: { id },
-    });
-
-    if (!audit) {
-      throw new NotFoundException('Audit not found');
-    }
-
-    const result = await this.auditResultRepository.findOne({
-      where: { auditId: id },
-    });
-
+  ): Promise<{ audit: any; result: any | null }> {
+    const result = await this.redisService.getAuditResult(id);
+    
     if (!result) {
       return {
-        audit,
+        audit: { id, status: 'pending_or_not_found' },
         result: null,
       };
     }
 
     return {
-      audit,
-      result,
+      audit: { id, status: 'completed' },
+      result: result,
     };
   }
 
   @Get(':id/export')
   async exportAuditResult(@Param('id') id: string) {
-    const audit = await this.auditRepository.findOne({
-      where: { id },
-    });
-
-    if (!audit) {
-      throw new NotFoundException('Audit not found');
-    }
-
-    const result = await this.auditResultRepository.findOne({
-      where: { auditId: id },
-    });
-
+    const result = await this.redisService.getAuditResult(id);
+    
     if (!result) {
-      throw new NotFoundException('Audit result not found');
+      throw new NotFoundException(`Audit result for ${id} not found or expired.`);
     }
-
-    let parsedAiSummary: unknown = null;
-    if (result.aiSummary) {
-      try {
-        parsedAiSummary = JSON.parse(result.aiSummary) as unknown;
-      } catch {
-        parsedAiSummary = {
-          overview: result.aiSummary,
-          strengths: [],
-          weaknesses: [],
-          recommendations: [],
-        };
-      }
-    }
-
-    return {
-      auditId: audit.id,
-      url: audit.url,
-      date: audit.createdAt,
-      scores: {
-        perf: result.perfScore,
-        seo: result.seoScore,
-        acc: result.accScore,
-        security: result.securityScore,
-      },
-      technology: result.techStack,
-      aiSummary: parsedAiSummary,
-      details: {
-        performance: result.perfDetails,
-        seo: result.seoDetails,
-        accessibility: result.accDetails,
-        security: result.securityDetails,
-        network: result.networkDetails,
-        structure: result.structureDetails,
-        jsErrors: result.jsErrorsDetails,
-        uiUx: result.uiUxDetails,
-      },
-    };
+    
+    return result;
   }
 }
