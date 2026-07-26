@@ -16,6 +16,7 @@ import { HtmlCheckerService } from '../../../src/audit/html-css/html-checker.ser
 import { CssCheckerService } from '../../../src/audit/html-css/css-checker.service';
 import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
 import { TechDetectorService } from '../../../src/audit/technology/tech-detector.service';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TechDetectorService } from '../../../src/audit/technology/tech-detector
     BullModule.registerQueue({
       name: 'audit-queue',
     }),
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

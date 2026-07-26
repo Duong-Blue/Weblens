@@ -11,6 +11,7 @@ import { TlsValidatorService } from '../../../src/audit/security/tls-validator.s
 import { SecurityMapperService } from '../../../src/audit/security/security-mapper.service';
 import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
 import { TechDetectorService } from '../../../src/audit/technology/tech-detector.service';
+import { RedisService } from './redis/redis.service';
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
 export class AuditProcessor extends WorkerHost {
@@ -27,6 +28,7 @@ export class AuditProcessor extends WorkerHost {
     private readonly securityMapperService: SecurityMapperService,
     private readonly htmlCssMapperService: HtmlCssMapperService,
     private readonly techDetectorService: TechDetectorService,
+    private readonly redisService: RedisService,
   ) {
     super();
   }
@@ -118,22 +120,17 @@ export class AuditProcessor extends WorkerHost {
         summary: typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
       };
 
-      this.logger.debug(`[Job ${job.id}] Step 4: Saving results...`);
-      if (anonymous) {
-          this.logger.log(`[Job ${job.id}] Anonymous audit completed, emitting results via job progress.`);
-          await job.updateProgress({ auditId, step: 'completed', progress: 100, data: resultData });
-      } else {
-        // Storage of results logic needs to be migrated to Redis
-        this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
-        await job.updateProgress({ auditId, step: 'completed', progress: 100, data: JSON.parse(JSON.stringify(resultData)) });
-      }
+      this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
+      
+      await this.redisService.setAuditResult(auditId, resultData);
+      
+      this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
+      await job.updateProgress({ auditId, step: 'completed', progress: 100, data: JSON.parse(JSON.stringify(resultData)) });
 
       return { success: true, result: resultData };
     } catch (error: any) {
       this.logger.error(`[Job ${job.id}] Audit failed for ${url}:`, error);
-      if (!anonymous) {
-        // Status updates logic needs to be migrated to Redis
-      }
+      
       await job.updateProgress({ 
         auditId, 
         step: 'failed', 
@@ -146,7 +143,7 @@ export class AuditProcessor extends WorkerHost {
 
   @OnWorkerEvent('progress')
   onProgress(job: Job) {
-    this.logger.verbose(`Job ${job.id} reported progress ${job.progress}%`);
+    this.logger.verbose(`Job ${job.id} reported progress`);
   }
 
   @OnWorkerEvent('failed')
