@@ -14,6 +14,7 @@ export const APIs = {
   audit: {
     create: '/audits',
     result: (id: string) => `/audits/${id}/result`,
+    export: (id: string) => `/audits/${id}/export`,
   },
 };
 

@@ -5,9 +5,11 @@ import {
   Param,
   Body,
   Req,
+  Res,
   NotFoundException,
   Logger,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -99,13 +101,18 @@ export class AuditController {
   }
 
   @Get(':id/export')
-  async exportAuditResult(@Param('id') id: string) {
+  async exportAuditResult(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.redisService.getAuditResult(id);
     
     if (!result) {
       throw new NotFoundException(`Audit result for ${id} not found or expired.`);
     }
     
+    res.setHeader('Content-Disposition', `attachment; filename="weblens-audit-${id}.json"`);
+    res.setHeader('Content-Type', 'application/json');
     return result;
   }
 }

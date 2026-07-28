@@ -27,7 +27,7 @@ export default function Home() {
 
   const socket = useSocket(process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000");
 
-  const { data: auditData, isLoading: isPolling, refetch } = useAuditResult(activeAuditId);
+  const { data: auditData, isLoading } = useAuditResult(activeAuditId);
 
   useEffect(() => {
     if (socket && activeAuditId) {
@@ -49,7 +49,6 @@ export default function Home() {
         if (payload.step === 'completed' && payload.data) {
           setLiveData(payload.data);
           setLiveStatus('completed');
-          if (refetch) refetch();
         }
 
         if (payload.step === 'failed') {
@@ -64,21 +63,32 @@ export default function Home() {
         socket.off(`audit-progress-${activeAuditId}`);
       }
     };
-  }, [socket, activeAuditId, refetch]);
+  }, [socket, activeAuditId]);
 
   const status = liveStatus || (auditData as { data?: { audit?: { status?: string } } })?.data?.audit?.status;
   const result = liveData || (auditData as { data?: { result?: AuditResult } })?.data?.result;
   const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling' || status === 'analyzed' || status === 'summarized';
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (activeAuditId && isAuditRunning) {
-      interval = setInterval(() => {
-        if (refetch) refetch();
-      }, 3000);
+  const downloadExport = async () => {
+    if (!activeAuditId) return;
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/audits/${activeAuditId}/export`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `weblens-audit-${activeAuditId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      console.error('Download export failed:', err);
     }
-    return () => clearInterval(interval);
-  }, [activeAuditId, isAuditRunning, refetch]);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,6 +256,11 @@ export default function Home() {
                 <CoreMetricsSection result={result} />
                 <DetailedMetricsSection result={result} />
                 <AiSummarySection aiSummary={result.aiSummary} />
+                <div className="flex justify-center mt-12">
+                  <Button onClick={downloadExport} className="px-8 py-4 font-semibold text-lg bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all hover:scale-105">
+                    Export JSON
+                  </Button>
+                </div>
               </div>
             )}
           </Card>
