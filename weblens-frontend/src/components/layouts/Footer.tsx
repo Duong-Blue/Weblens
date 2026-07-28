@@ -24,9 +24,6 @@ export const Footer = () => {
                 <Link href="/" className="transition-colors hover:text-zinc-900">Báo cáo phân tích</Link>
               </li>
               <li>
-                <Link href="/dashboard" className="transition-colors hover:text-zinc-900">Bảng điều khiển</Link>
-              </li>
-              <li>
                 <Link href="#" className="transition-colors hover:text-zinc-900">Bảng giá</Link>
               </li>
               <li>
