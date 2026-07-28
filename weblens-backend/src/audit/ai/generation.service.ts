@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EnhancedIssue, ContextualFinding } from './enhancement.service';
-import { TechnologyStack } from '../technology/tech-detector.service';
+import { TechStack } from '@weblens/audit-engine';
 
 export interface ScreenshotCollection {
   desktop: string;
@@ -15,7 +15,7 @@ export interface AIGenerationInput {
   breakdown: Record<string, number>;
   enhancedIssues: EnhancedIssue[];
   contextualFindings: ContextualFinding[];
-  techStack: TechnologyStack;
+  techStack: TechStack;
   screenshots: ScreenshotCollection;
 }
 

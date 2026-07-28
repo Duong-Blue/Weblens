@@ -1,11 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { SIGNATURES } from './signatures';
 
+export interface TechItem {
+  name: string;
+  category: string;
+  confidence: number;
+  version?: string;
+  evidence: any;
+  isDeprecated: boolean;
+  endOfLife?: string;
+}
+
 export interface DetectionResult {
-  frameworks: string[];
-  cms: string[];
-  hosting: string[];
-  analytics: string[];
+  frameworks?: TechItem[];
+  cms?: TechItem[];
+  hosting?: TechItem[];
+  analytics?: TechItem[];
+  [key: string]: TechItem[] | undefined;
 }
 
 export type SignatureCategory = 'framework' | 'cms' | 'hosting' | 'analytics';
@@ -54,26 +65,33 @@ export class TechDetectorService {
    * @returns       Grouped list of detected technologies.
    */
   detect(html: string, headers: Record<string, string> = {}): DetectionResult {
-    const frameworks: string[] = [];
-    const cms: string[] = [];
-    const hosting: string[] = [];
-    const analytics: string[] = [];
+    const frameworks: TechItem[] = [];
+    const cms: TechItem[] = [];
+    const hosting: TechItem[] = [];
+    const analytics: TechItem[] = [];
 
     for (const sig of this.signatures) {
       try {
         if (sig.test(html, headers)) {
+          const item: TechItem = {
+            name: sig.name,
+            category: sig.category,
+            confidence: 1.0,
+            evidence: null,
+            isDeprecated: false,
+          };
           switch (sig.category) {
             case 'framework':
-              frameworks.push(sig.name);
+              frameworks.push(item);
               break;
             case 'cms':
-              cms.push(sig.name);
+              cms.push(item);
               break;
             case 'hosting':
-              hosting.push(sig.name);
+              hosting.push(item);
               break;
             case 'analytics':
-              analytics.push(sig.name);
+              analytics.push(item);
               break;
           }
         }

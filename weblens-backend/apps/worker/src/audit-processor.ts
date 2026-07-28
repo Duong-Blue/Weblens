@@ -10,7 +10,7 @@ import { HeaderCheckerService } from '../../../src/audit/security/header-checker
 import { TlsValidatorService } from '../../../src/audit/security/tls-validator.service';
 import { SecurityMapperService } from '../../../src/audit/security/security-mapper.service';
 import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
-import { TechDetectorService } from '../../../src/audit/technology/tech-detector.service';
+import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
@@ -86,7 +86,7 @@ export class AuditProcessor extends WorkerHost {
       (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(i => i.id.startsWith('CSS-'));
 
       this.logger.debug(`[Job ${job.id}] Step 2.7.5: Detecting technology stack...`);
-      const technologies = this.techDetectorService.detect(crawlData as any);
+      const technologies = this.techDetectorService.detect(crawlData.htmlContent, (crawlData as any).headers || {});
       (comprehensiveAuditData as any).technologies = technologies;
 
       this.logger.debug(`[Job ${job.id}] Step 2.8: Calculating Final Scores...`);

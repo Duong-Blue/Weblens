@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrioritizedIssue } from './classification.service';
-import { TechnologyStack } from '../technology/tech-detector.service';
+import { TechStack } from '@weblens/audit-engine';
 
 export interface CrawlResult {
   url: string;
@@ -15,7 +15,7 @@ export interface CrawlResult {
 export interface AIEnhancementInput {
   issues: PrioritizedIssue[];
   crawlData: Partial<CrawlResult>;
-  techStack: TechnologyStack;
+  techStack: TechStack;
 }
 
 export interface EnhancedIssue {

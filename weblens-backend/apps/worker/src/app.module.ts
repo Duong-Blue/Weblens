@@ -15,7 +15,7 @@ import { SecurityMapperService } from '../../../src/audit/security/security-mapp
 import { HtmlCheckerService } from '../../../src/audit/html-css/html-checker.service';
 import { CssCheckerService } from '../../../src/audit/html-css/css-checker.service';
 import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
-import { TechDetectorService } from '../../../src/audit/technology/tech-detector.service';
+import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisModule } from './redis/redis.module';
 
 @Module({

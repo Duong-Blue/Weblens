@@ -49,7 +49,7 @@ export default function HistoryPage() {
               {audits.length > 0 ? audits.map((audit: Record<string, unknown> & { id?: string; url?: string; createdAt?: string; score?: number; status?: string }) => (
                 <tr key={audit.id} className="border-b border-gray-100 hover:bg-gray-50/50">
                   <td className="p-4 font-medium text-gray-900">{audit.url}</td>
-                  <td className="p-4 text-gray-500">{new Date(audit.createdAt).toLocaleString()}</td>
+                  <td className="p-4 text-gray-500">{audit.createdAt ? new Date(audit.createdAt).toLocaleString() : 'Unknown'}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                       audit.status === 'completed' ? 'bg-green-100 text-green-700' :

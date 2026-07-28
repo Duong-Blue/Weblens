@@ -83,11 +83,22 @@ export interface SecurityDetails {
   vulnerabilities: { name: string; severity: string; description: string }[];
 }
 
+export interface TechItem {
+  name: string;
+  category: string;
+  confidence: number;
+  version?: string;
+  evidence: any;
+  isDeprecated: boolean;
+  endOfLife?: string;
+}
+
 export interface TechStack {
-  frameworks: string[];
-  cms: string[];
-  hosting: string[];
-  analytics: string[];
+  frameworks?: TechItem[];
+  cms?: TechItem[];
+  hosting?: TechItem[];
+  analytics?: TechItem[];
+  [key: string]: TechItem[] | undefined;
 }
 
 export interface NetworkDetails {
