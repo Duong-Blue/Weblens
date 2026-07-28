@@ -13,7 +13,6 @@
 export const APIs = {
   audit: {
     create: '/audits',
-    list: '/audits',
     result: (id: string) => `/audits/${id}/result`,
   },
 };

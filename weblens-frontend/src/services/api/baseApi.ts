@@ -77,6 +77,5 @@ export const baseApi = createApi({
     }
     return { error: { status: result.status, data } as QueryError };
   }) as BaseQueryFn<QueryArgs, unknown, QueryError>,
-  tagTypes: ['Audit'],
   endpoints: () => ({}),
 });
