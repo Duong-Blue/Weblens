@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuditIssue } from '../types/audit.types';
+import { AuditIssue } from '../../models';
 
 export interface HeaderCheck {
   headerName: string;
@@ -116,7 +116,7 @@ export class HeaderCheckerService {
           type: 'http-header',
           actual: value || '(missing)',
           expected: check.expected.toString(),
-          source: 'response.headers()',
+          source: 'response.headers()', confidence: 1.0,
         }],
         effort: 'minutes',
         category: 'security',

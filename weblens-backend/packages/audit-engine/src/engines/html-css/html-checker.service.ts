@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
-import { AuditIssue } from '../types/audit.types';
+import { AuditIssue } from '../../models';
 
 @Injectable()
 export class HtmlCheckerService {
@@ -25,7 +25,7 @@ export class HtmlCheckerService {
     ): AuditIssue => ({
       id: `HTML-${id}-${Date.now()}`,
       ruleId,
-      engine: 'HTML_CSS',
+      engine: 'html',
       severity,
       status: passed ? 'pass' : 'fail',
       score: passed ? 1 : 0,
@@ -35,6 +35,7 @@ export class HtmlCheckerService {
       impact,
       recommendation,
       category: 'HTML Structure',
+      evidence: []
     });
 
     // HTML-001: Doctype

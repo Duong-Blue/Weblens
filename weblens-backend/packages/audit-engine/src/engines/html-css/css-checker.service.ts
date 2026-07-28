@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
-import { AuditIssue } from '../types/audit.types';
+import { AuditIssue } from '../../models';
 
 @Injectable()
 export class CssCheckerService {
@@ -22,7 +22,7 @@ export class CssCheckerService {
     ): AuditIssue => ({
       id: `CSS-${id}-${Date.now()}`,
       ruleId,
-      engine: 'HTML_CSS',
+      engine: 'css',
       severity,
       status: passed ? 'pass' : 'fail',
       score: passed ? 1 : 0,
@@ -32,6 +32,7 @@ export class CssCheckerService {
       impact,
       recommendation,
       category: 'CSS Best Practices',
+      evidence: []
     });
 
     // CSS-002: Render-blocking CSS

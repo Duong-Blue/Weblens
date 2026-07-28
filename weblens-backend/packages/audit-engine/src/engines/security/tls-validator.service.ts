@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuditIssue } from '../types/audit.types';
+import { AuditIssue } from '../../models';
 
 export interface TLSInfo {
   version: string;
@@ -36,7 +36,7 @@ export class TlsValidatorService {
           type: 'http-response',
           actual: 'No TLS connection',
           expected: 'Valid TLS connection',
-          source: 'CDP Security.tlsInfo',
+          source: 'CDP Security.tlsInfo', confidence: 1.0,
         }],
         effort: 'hours',
         category: 'security',
@@ -68,7 +68,7 @@ export class TlsValidatorService {
         type: 'http-response',
         actual: tlsInfo.version,
         expected: 'TLS 1.2 or higher',
-        source: 'CDP Security.tlsInfo',
+        source: 'CDP Security.tlsInfo', confidence: 1.0,
       }],
       effort: 'hours',
       category: 'security',
@@ -107,7 +107,7 @@ export class TlsValidatorService {
           type: 'http-response',
           actual: `Expires in ${daysRemaining} days (${tlsInfo.certificate.validTo})`,
           expected: '> 30 days remaining',
-          source: 'CDP Security.certificate',
+          source: 'CDP Security.certificate', confidence: 1.0,
         }],
         effort: 'hours',
         category: 'security',
@@ -129,7 +129,7 @@ export class TlsValidatorService {
           type: 'http-response',
           actual: 'No certificate data',
           expected: 'Valid certificate data',
-          source: 'CDP Security.certificate',
+          source: 'CDP Security.certificate', confidence: 1.0,
         }],
         effort: 'hours',
         category: 'security',

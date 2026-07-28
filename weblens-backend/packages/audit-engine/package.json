@@ -11,8 +11,11 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@nestjs/common": "^11.0.1",
     "@weblens/tech-detector": "*",
-    "cheerio": "^1.2.0"
+    "axe-core": "^4.12.1",
+    "cheerio": "^1.2.0",
+    "playwright": "^1.62.0"
   }
 }

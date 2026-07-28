@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuditIssue } from '../types/audit.types';
+import { AuditIssue } from '../../models';
 import { HtmlCheckerService } from './html-checker.service';
 import { CssCheckerService } from './css-checker.service';
 

@@ -1,31 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as axe from 'axe-core';
-
-// Interfaces based on PHASE_04_ACCESSIBILITY_ENGINE.md
-export interface AuditIssue {
-  id: string;
-  ruleId: string;
-  engine: string;
-  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-  status: 'pass' | 'fail' | 'warning' | 'manual-review';
-  score: number;
-  weight: number;
-  title: string;
-  description: string;
-  impact?: string;
-  recommendation: string;
-  evidence: Array<{
-    type: string;
-    selector?: string;
-    actual: string;
-    expected: string;
-    htmlSnippet?: string;
-    source: string;
-  }>;
-  effort: string;
-  category: string;
-  wcagRef?: string;
-}
+import { AuditIssue } from '../../models';
 
 export interface CrawlResult {
   htmlContent: string;
@@ -90,7 +65,7 @@ export class WcagMapperService {
             actual: node.html || '',
             expected: node.failureSummary || 'Follow WCAG guidelines',
             htmlSnippet: node.html,
-            source: 'axe-core',
+            source: 'axe-core', confidence: 1.0,
           }],
           effort: 'hours',
           category: 'accessibility',
@@ -213,7 +188,7 @@ export class WcagMapperService {
         type: 'css-rule',
         actual: hasStickyHeader ? 'position: fixed/sticky on header' : (hasCookieBanner ? 'Found cookie banner' : 'No sticky header'),
         expected: 'No element should obscure focused elements during keyboard navigation',
-        source: 'CSS analysis',
+        source: 'CSS analysis', confidence: 1.0,
       }],
       effort: 'hours',
       category: 'accessibility',
@@ -254,7 +229,7 @@ export class WcagMapperService {
         type: 'html-element',
         actual: `Found ${smallTargets.length} potentially undersized targets`,
         expected: 'All interactive targets >= 24x24 CSS pixels',
-        source: 'DOM analysis (heuristic)',
+        source: 'DOM analysis (heuristic)', confidence: 1.0,
       }],
       effort: 'hours',
       category: 'accessibility',

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuditIssue } from '../types/audit.types';
+import { AuditIssue } from '../../models';
 
 export interface MozillaResult {
   score: number;
