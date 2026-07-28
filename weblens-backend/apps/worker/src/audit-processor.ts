@@ -2,14 +2,8 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { CrawlerService } from './crawler/crawler.service';
-import { AuditLogicService, ScoringService, EngineScore } from '@weblens/audit-engine';
+import { AuditLogicService, ScoringService, EngineScore, AxeRunnerService, WcagMapperService, HeaderCheckerService, TlsValidatorService, SecurityMapperService, HtmlCssMapperService } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
-import { AxeRunnerService } from '../../../src/audit/accessibility/axe-runner.service';
-import { WcagMapperService } from '../../../src/audit/accessibility/wcag-mapper.service';
-import { HeaderCheckerService } from '../../../src/audit/security/header-checker.service';
-import { TlsValidatorService } from '../../../src/audit/security/tls-validator.service';
-import { SecurityMapperService } from '../../../src/audit/security/security-mapper.service';
-import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
 
@@ -86,7 +80,7 @@ export class AuditProcessor extends WorkerHost {
       (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(i => i.id.startsWith('CSS-'));
 
       this.logger.debug(`[Job ${job.id}] Step 2.7.5: Detecting technology stack...`);
-      const technologies = this.techDetectorService.detect(crawlData.htmlContent, (crawlData as any).headers || {});
+      const technologies = this.techDetectorService.detect((crawlData as any).htmlContent, (crawlData as any).headers || {});
       (comprehensiveAuditData as any).technologies = technologies;
 
       this.logger.debug(`[Job ${job.id}] Step 2.8: Calculating Final Scores...`);

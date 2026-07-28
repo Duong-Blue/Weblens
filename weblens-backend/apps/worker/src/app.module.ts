@@ -4,17 +4,19 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CrawlerService } from './crawler/crawler.service';
-import { AuditLogicService } from '@weblens/audit-engine';
+import { 
+  AuditLogicService, 
+  AxeRunnerService, 
+  WcagMapperService, 
+  HeaderCheckerService, 
+  TlsValidatorService, 
+  SecurityMapperService, 
+  HtmlCheckerService, 
+  CssCheckerService, 
+  HtmlCssMapperService 
+} from '@weblens/audit-engine';
 import { AuditProcessor } from './audit-processor';
 import { AiServiceService } from './ai-service/ai-service.service';
-import { AxeRunnerService } from '../../../src/audit/accessibility/axe-runner.service';
-import { WcagMapperService } from '../../../src/audit/accessibility/wcag-mapper.service';
-import { HeaderCheckerService } from '../../../src/audit/security/header-checker.service';
-import { TlsValidatorService } from '../../../src/audit/security/tls-validator.service';
-import { SecurityMapperService } from '../../../src/audit/security/security-mapper.service';
-import { HtmlCheckerService } from '../../../src/audit/html-css/html-checker.service';
-import { CssCheckerService } from '../../../src/audit/html-css/css-checker.service';
-import { HtmlCssMapperService } from '../../../src/audit/html-css/html-css-mapper.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisModule } from './redis/redis.module';
 
