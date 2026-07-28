@@ -1,6 +1,7 @@
 import React from "react";
+import { TechStack } from "@/types/audit";
 
-export const TechStackSection = ({ techStack }: { techStack: any }) => {
+export const TechStackSection = ({ techStack }: { techStack: TechStack | null | undefined }) => {
   if (!techStack) return null;
   return (
     <section>

@@ -1,41 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as axe from 'axe-core';
-import { JSDOM } from 'jsdom';
+import { AxeBuilder } from '@axe-core/playwright';
+import { Page } from 'playwright';
 
 @Injectable()
 export class AxeRunnerService {
   private readonly logger = new Logger(AxeRunnerService.name);
 
   /**
-   * Run axe-core against raw HTML string
-   * This is used when we don't have a live page context (e.g. offline analysis)
+   * Run axe-core against a live Playwright page context
    */
-  async runAxeOnHtml(html: string): Promise<axe.AxeResults> {
-    this.logger.debug('Running axe-core on HTML string');
+  async runAxeOnPage(page: Page): Promise<axe.AxeResults> {
+    this.logger.debug('Running axe-core on Playwright page');
     
     try {
-      const dom = new JSDOM(html);
-      
-      const oldWindow = global.window;
-      const oldDocument = global.document;
-      
-      global.window = dom.window as any;
-      global.document = dom.window.document as any;
-
-      try {
-        const results = await axe.run(dom.window.document as any, {
-          runOnly: {
-            type: 'tag',
-            values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']
-          },
-          resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
-        });
+      // Create AxeBuilder with the Playwright page.
+      // @axe-core/playwright requires popup blockers to be disabled to spawn a blank page for finishRun
+      // It also requires us to NOT use legacyMode unless we want to disable cross-origin frame testing.
+      const builder = new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
+        .setLegacyMode(true); // use legacyMode to avoid browser.newContext() which fails here since we don't pass the context properly, we just pass the page, and axe wants to spawn a new page in the context
         
-        return results;
-      } finally {
-        global.window = oldWindow;
-        global.document = oldDocument;
-      }
+      return await builder.analyze();
     } catch (error) {
       this.logger.error(`Error running axe-core: ${error.message}`, error.stack);
       throw error;

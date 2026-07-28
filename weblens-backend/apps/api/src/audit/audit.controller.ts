@@ -5,17 +5,13 @@ import {
   Param,
   Body,
   Req,
-  Query,
-  UseGuards,
   NotFoundException,
   Logger,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Throttle } from '@nestjs/throttler';
-// import { Audit, AuditResult, User } from '@weblens/shared-types';
 import { CreateAuditDto } from './dto/create-audit.dto';
 import type { Request } from 'express';
 import { randomUUID } from 'crypto';
@@ -53,7 +49,6 @@ export class AuditController {
     const partialAudit = {
       id: generatedId,
       url: formattedUrl,
-      userId: undefined,
       status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -64,7 +59,6 @@ export class AuditController {
       {
         auditId: generatedId,
         url: formattedUrl,
-        userId: undefined,
         anonymous: true,
       },
       {
@@ -82,28 +76,6 @@ export class AuditController {
     return {
       message: 'Anonymous audit job created successfully',
       audit: partialAudit,
-    };
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  async getMyAudits(
-    @Req() req: Request & { user: { sub: string } },
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
-  ) {
-    const pageNum = parseInt(page, 10) || 1;
-    const limitNum = parseInt(limit, 10) || 10;
-    
-    // Needs to be migrated to Redis
-    return {
-      data: [],
-      meta: {
-        total: 0,
-        page: pageNum,
-        limit: limitNum,
-        totalPages: 0,
-      },
     };
   }
 

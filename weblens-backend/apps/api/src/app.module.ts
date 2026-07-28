@@ -17,7 +17,7 @@ import { ExpressAdapter } from '@bull-board/express';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../../.env', // Point to the root .env file of the monorepo
+      envFilePath: '.env', // Point to the root .env file of the monorepo
     }),
     BullModule.forRoot({
       connection: {

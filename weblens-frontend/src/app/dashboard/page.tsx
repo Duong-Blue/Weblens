@@ -1,13 +1,11 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSocket } from '@/features/audit/hooks/useSocket';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { useGetProfileQuery } from '@/services/api/authApi';
-import { setUser } from '@/store/slices/authSlice';
+import { AuditResult } from '@/types/audit';
+
+type LiveDataType = Partial<AuditResult> & { error?: string };
 import { useCreateAuditMutation, useLazyGetAuditResultQuery } from '@/services/api/auditApi';
-import { useLogoutMutation } from '@/services/api/authApi';
-import { clearUser } from '@/store/slices/authSlice';
 import ReactMarkdown from 'react-markdown';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,12 +25,10 @@ const ScoreCard = ({ title, score }: { title: string, score: number }) => {
   );
 };
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const socket = useSocket(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
-  const dispatch = useAppDispatch();
-  const user = useAppSelector(state => state.auth.user);
   
   const [url, setUrl] = useState('');
   const [activeAuditId, setActiveAuditId] = useState<string | null>(null);
@@ -40,50 +36,36 @@ export default function Dashboard() {
   useEffect(() => {
     const idFromUrl = searchParams.get('auditId');
     if (idFromUrl && !activeAuditId) {
-      setActiveAuditId(idFromUrl);
+      setTimeout(() => setActiveAuditId(idFromUrl), 0);
     }
-  }, [searchParams]);
-  const [liveData, setLiveData] = useState<any>(null);
+  }, [searchParams, activeAuditId]);
+  const [liveData, setLiveData] = useState<LiveDataType | null>(null);
   const [liveStatus, setLiveStatus] = useState<string>('');
 
-  const { data: profileData, isLoading: isUserLoading, isError } = useGetProfileQuery();
   const [createAudit, { isLoading: isCreating }] = useCreateAuditMutation();
   const [triggerGetAudit, { data: auditData, isFetching: isPolling }] = useLazyGetAuditResultQuery();
-  const [triggerLogout] = useLogoutMutation();
-
-  useEffect(() => {
-    if (profileData?.data) {
-        dispatch(setUser(profileData.data));
-    }
-  }, [profileData, dispatch]);
-
-  useEffect(() => {
-    if (isError && !activeAuditId) {
-      router.push('/login');
-    }
-  }, [isError, activeAuditId, router]);
 
   useEffect(() => {
     if (socket && activeAuditId) {
-      socket.on(`audit-progress-${activeAuditId}`, (payload: any) => {
+      socket.on(`audit-progress-${activeAuditId}`, (payload: { step: string; data?: Partial<AuditResult> & { errorMessage?: string } }) => {
         setLiveStatus(payload.step);
         
         if (payload.step === 'analyzed') {
-           setLiveData((prev: any) => ({ ...prev, ...payload.data }));
+           setLiveData((prev: LiveDataType | null) => ({ ...prev, ...payload.data }));
         }
         
         if (payload.step === 'summarized') {
-           setLiveData((prev: any) => ({ ...prev, aiSummary: payload.data.aiSummary }));
+           setLiveData((prev: LiveDataType | null) => ({ ...prev, aiSummary: payload.data?.aiSummary }));
         }
         
-        if (payload.step === 'completed') {
+        if (payload.step === 'completed' && payload.data) {
            setLiveData(payload.data);
            setLiveStatus('completed');
         }
 
         if (payload.step === 'failed') {
            setLiveStatus('failed');
-           setLiveData((prev: any) => ({ ...prev, error: payload.data?.errorMessage }));
+           setLiveData((prev: LiveDataType | null) => ({ ...prev, error: payload.data?.errorMessage }));
         }
       });
     }
@@ -120,13 +102,6 @@ export default function Dashboard() {
     return () => window.removeEventListener('test-trigger-poll', handleForcePoll);
   }, [activeAuditId, triggerGetAudit]);
 
-  const handleLogout = () => {
-    triggerLogout().then(() => {
-      dispatch(clearUser());
-      router.push('/login');
-    });
-  };
-
   const handleStartAudit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!url) return;
@@ -140,26 +115,15 @@ export default function Dashboard() {
     setLiveData(null);
     setLiveStatus('');
 
-    createAudit({ url: submitUrl, anonymous: false })
+    createAudit({ url: submitUrl, anonymous: true })
         .unwrap()
-        .then((res: any) => {
+        .then((res: { data?: { audit?: { id?: string } } }) => {
         if (res?.data?.audit?.id) {
             setActiveAuditId(res.data.audit.id);
             setLiveStatus('pending');
         }
         });
   };
-
-  if (isUserLoading && !activeAuditId) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
-          <p className="text-zinc-500 font-medium animate-pulse">Loading workspace...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-12 font-sans flex flex-col">
@@ -174,35 +138,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-5">
               <div className="text-sm text-zinc-600 hidden sm:block">
-                <span className="font-medium">{user?.name || user?.email || 'Anonymous'}</span>
-              </div>
-              <div className="flex gap-2">
-                {!isError && (
-                  <Button 
-                    variant="ghost"
-                    onClick={() => router.push('/history')}
-                    className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
-                  >
-                    History
-                  </Button>
-                )}
-                {isError ? (
-                  <Button 
-                    variant="outline"
-                    onClick={() => router.push('/login')}
-                    className="text-sm font-medium shadow-sm"
-                  >
-                    Login
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline"
-                    onClick={handleLogout}
-                    className="text-sm font-medium shadow-sm"
-                  >
-                    Logout
-                  </Button>
-                )}
+                <span className="font-medium">Anonymous</span>
               </div>
             </div>
           </div>
@@ -356,5 +292,13 @@ export default function Dashboard() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

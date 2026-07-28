@@ -59,10 +59,10 @@ export class AuditProcessor extends WorkerHost {
       const comprehensiveAuditData = await this.auditLogicService.performComprehensiveAudit(crawlData, url);
       
       this.logger.debug(`[Job ${job.id}] Step 2.5: Running accessibility audit...`);
-      const accessibilityResults = await this.axeRunnerService.runAxeOnHtml(crawlData.htmlContent);
+      const accessibilityResults = await this.axeRunnerService.runAxeOnPage((crawlData as any).page);
       const mappedAccessibilityIssues = await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
       (comprehensiveAuditData as any).accessibility = mappedAccessibilityIssues;
-      
+
       this.logger.debug(`[Job ${job.id}] Step 2.6: Running security audit...`);
       const headers = (crawlData as any).headers || {};
       const tlsInfo = (crawlData as any).tlsInfo || null;
@@ -120,6 +120,10 @@ export class AuditProcessor extends WorkerHost {
         summary: typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
       };
 
+      if ((crawlData as any).browser) {
+          try { await (crawlData as any).browser.close(); } catch(e) {}
+      }
+
       this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
       
       await this.redisService.setAuditResult(auditId, resultData);
@@ -130,7 +134,7 @@ export class AuditProcessor extends WorkerHost {
       return { success: true, result: resultData };
     } catch (error: any) {
       this.logger.error(`[Job ${job.id}] Audit failed for ${url}:`, error);
-      
+
       await job.updateProgress({ 
         auditId, 
         step: 'failed', 

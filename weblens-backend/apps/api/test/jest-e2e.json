@@ -5,5 +5,9 @@
   "testRegex": ".spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@weblens/shared-types$": "<rootDir>/../../../packages/shared-types/src/index",
+    "^@weblens/redis$": "<rootDir>/../../../packages/redis/src/index"
   }
 }

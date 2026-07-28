@@ -46,7 +46,7 @@ export default function HistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {audits.length > 0 ? audits.map((audit: any) => (
+              {audits.length > 0 ? audits.map((audit: Record<string, unknown> & { id?: string; url?: string; createdAt?: string; score?: number; status?: string }) => (
                 <tr key={audit.id} className="border-b border-gray-100 hover:bg-gray-50/50">
                   <td className="p-4 font-medium text-gray-900">{audit.url}</td>
                   <td className="p-4 text-gray-500">{new Date(audit.createdAt).toLocaleString()}</td>

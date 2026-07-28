@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "ts-node-dev -r tsconfig-paths/register --respawn src/main.ts",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/worker/src/main",
+    "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -38,12 +38,10 @@
     "dotenv": "^17.4.2",
     "ioredis": "^5.11.1",
     "lighthouse": "^13.4.0",
-    "mysql2": "^3.23.1",
     "openai": "^6.48.0",
     "playwright": "^1.61.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "typeorm": "^1.1.0"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

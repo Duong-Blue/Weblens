@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { AuditResult } from "@/types/audit";
 
-export const DetailedMetricsSection = ({ result }: { result: any }) => {
+export const DetailedMetricsSection = ({ result }: { result: Partial<AuditResult> }) => {
   const [activeTab, setActiveTab] = useState('performance');
 
   if (!result?.perfDetails && !result?.seoDetails && !result?.accDetails && !result?.securityDetails) return null;
@@ -58,7 +59,7 @@ export const DetailedMetricsSection = ({ result }: { result: any }) => {
               </li>
               <li className="flex justify-between items-center py-1 border-b border-zinc-100/50 last:border-0">
                 <span className="text-zinc-500">JS Errors</span>
-                <span className={`font-medium px-2.5 py-0.5 rounded-full ${result.jsErrorsDetails?.errorCount > 0 ? 'bg-rose-100 text-rose-700' : 'bg-zinc-100 text-zinc-900'}`}>
+                <span className={`font-medium px-2.5 py-0.5 rounded-full ${(result.jsErrorsDetails?.errorCount ?? 0) > 0 ? 'bg-rose-100 text-rose-700' : 'bg-zinc-100 text-zinc-900'}`}>
                   {result.jsErrorsDetails?.errorCount || 0}
                 </span>
               </li>
@@ -110,13 +111,13 @@ export const DetailedMetricsSection = ({ result }: { result: any }) => {
             </h3>
             <ul className="space-y-4 text-sm">
               <li className="flex justify-between items-center py-1 border-b border-zinc-100/50 last:border-0">
-                <span className="text-zinc-500">Aria Attributes</span>
-                <span className="font-medium text-zinc-900 bg-zinc-100 px-2.5 py-0.5 rounded-full">{result.accDetails?.ariaCount || 0}</span>
+                <span className="text-zinc-500">Missing Aria Labels</span>
+                <span className="font-medium text-zinc-900 bg-zinc-100 px-2.5 py-0.5 rounded-full">{result.accDetails?.missingAriaLabels || 0}</span>
               </li>
               <li className="flex justify-between items-center py-1 border-b border-zinc-100/50 last:border-0">
                 <span className="text-zinc-500">Image Alt Tags Missing</span>
-                <span className={`font-medium px-2.5 py-0.5 rounded-full ${result.accDetails?.missingAltCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                  {result.accDetails?.missingAltCount || 0}
+                <span className={`font-medium px-2.5 py-0.5 rounded-full ${(result.accDetails?.imagesWithoutAlt ?? 0) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                  {result.accDetails?.imagesWithoutAlt || 0}
                 </span>
               </li>
             </ul>
@@ -137,9 +138,9 @@ export const DetailedMetricsSection = ({ result }: { result: any }) => {
                 </span>
               </li>
               <li className="flex justify-between items-center py-1 border-b border-zinc-100/50 last:border-0">
-                <span className="text-zinc-500">Secure Cookies</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${result.securityDetails?.secureCookies ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                  {result.securityDetails?.secureCookies ? "Yes" : "No/Unknown"}
+                <span className="text-zinc-500">Cookie Security</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${result.securityDetails?.cookies?.missingSecure === 0 ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                  {result.securityDetails?.cookies?.missingSecure === 0 ? "All Secure" : `${result.securityDetails?.cookies?.missingSecure || 0} insecure`}
                 </span>
               </li>
             </ul>

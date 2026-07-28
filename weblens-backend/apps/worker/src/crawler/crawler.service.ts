@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { chromium, Browser, Page } from 'playwright';
 import { URL } from 'url';
-import getPort from 'get-port';
+// We need to dynamically import get-port since it's an ESM package
+// const getPort = require('get-port');
 import * as fs from 'fs';
 import * as path from 'path';
 import { CrawlResult, ConsoleMessageEntry, NetworkRequest, LighthouseData, ScreenshotItem } from '@weblens/audit-engine';
@@ -68,6 +69,8 @@ export class CrawlerService {
   private readonly logger = new Logger(CrawlerService.name);
 
   async crawl(url: string): Promise<CrawlResult> {
+    // Import get-port dynamically at runtime since it's an ESM package
+    const { default: getPort } = await (eval('import("get-port")') as Promise<any>);
     const port = await getPort();
     const browser: Browser = await chromium.launch({ 
       headless: true,
@@ -179,6 +182,21 @@ export class CrawlerService {
 
     // Fetch robots.txt relative to target URL
     const robotsInfo = await this.fetchRobotsTxt(url);
+    
+    const crawlResult = {
+      htmlContent: content,
+      networkRequests,
+      consoleMessages,
+      performanceTiming: parsedTiming,
+      sitemapInfo,
+      robotsInfo,
+      cwv,
+      lighthouseData: undefined as any,
+      mainHeaders,
+      screenshots,
+      page,
+      browser,
+    };
 
     let lighthouseData: LighthouseData;
     try {
@@ -216,20 +234,9 @@ export class CrawlerService {
       this.logger.log(`Used fallback simulated Lighthouse data for ${url} due to failure.`);
     }
 
-    await browser.close();
+    crawlResult.lighthouseData = lighthouseData;
 
-    return {
-      htmlContent: content,
-      networkRequests,
-      consoleMessages,
-      performanceTiming: parsedTiming,
-      sitemapInfo,
-      robotsInfo,
-      cwv,
-      lighthouseData,
-      mainHeaders,
-      screenshots,
-    };
+    return crawlResult;
   }
 
   private async scrollPageWithLazyLoad(page: Page) {

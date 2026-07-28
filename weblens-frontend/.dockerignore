@@ -1,1 +1,3 @@
-node_modules\n.next\n.git
+node_modules
+.next
+.git

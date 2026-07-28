@@ -11,12 +11,6 @@
  * fetch wrapper (see `services/api/baseApi.ts`).
  */
 export const APIs = {
-  auth: {
-    login: '/auth/login',
-    register: '/auth/register',
-    logout: '/auth/logout',
-    profile: '/user/profile',
-  },
   audit: {
     create: '/audits',
     list: '/audits',

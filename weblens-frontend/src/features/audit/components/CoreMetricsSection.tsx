@@ -1,5 +1,6 @@
 import React from "react";
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from "recharts";
+import { AuditResult } from "@/types/audit";
 
 const getScoreColor = (score: number) => {
   if (score >= 90) return { text: "text-emerald-600", bg: "bg-emerald-50/50", border: "border-emerald-100", ring: "ring-emerald-500/20", fill: "#059669", track: "#d1fae5" };
@@ -43,16 +44,16 @@ export const ScoreCard = ({ title, score }: { title: string, score: number }) =>
   );
 };
 
-export const CoreMetricsSection = ({ result }: { result: any }) => {
+export const CoreMetricsSection = ({ result }: { result: Partial<AuditResult> }) => {
   if (result?.perfScore === undefined) return null;
   return (
     <section>
       <h3 className="text-lg font-semibold text-zinc-900 mb-6">Core Metrics</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        <ScoreCard title="Performance" score={result.perfScore} />
-        <ScoreCard title="SEO" score={result.seoScore} />
-        <ScoreCard title="Accessibility" score={result.accScore} />
-        <ScoreCard title="Security" score={result.securityScore} />
+        <ScoreCard title="Performance" score={result.perfScore ?? 0} />
+        <ScoreCard title="SEO" score={result.seoScore ?? 0} />
+        <ScoreCard title="Accessibility" score={result.accScore ?? 0} />
+        <ScoreCard title="Security" score={result.securityScore ?? 0} />
       </div>
     </section>
   );

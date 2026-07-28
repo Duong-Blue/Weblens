@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from "react";
 
 interface Recommendation {
@@ -14,7 +13,7 @@ interface ParsedSummary {
   recommendations?: Recommendation[];
 }
 
-export const AiSummarySection = ({ aiSummary }: { aiSummary?: string | any }) => {
+export const AiSummarySection = ({ aiSummary }: { aiSummary?: string | null }) => {
   const { isJson, parsedData } = useMemo(() => {
     if (!aiSummary) return { isJson: false, parsedData: null };
     if (typeof aiSummary === 'object') return { isJson: true, parsedData: aiSummary as ParsedSummary };
@@ -29,7 +28,7 @@ export const AiSummarySection = ({ aiSummary }: { aiSummary?: string | any }) =>
         return { isJson: true, parsedData: parsed as ParsedSummary };
       }
       return { isJson: false, parsedData: null };
-    } catch (e) {
+    } catch {
       return { isJson: false, parsedData: null };
     }
   }, [aiSummary]);

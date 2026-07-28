@@ -2,7 +2,7 @@ import { createApi, BaseQueryFn } from '@reduxjs/toolkit/query/react';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-function toSearchParams(params: Record<string, any>): string {
+function toSearchParams(params: Record<string, unknown>): string {
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null) {
@@ -29,11 +29,6 @@ async function baseFetch(input: RequestInfo, init?: RequestInit) {
     },
   });
 
-  /* Global 401 → redirect to login (unless already there) */
-  if (response.status === 401 && typeof window !== 'undefined' && window.location.pathname !== '/login') {
-    window.location.href = '/login?expired=true';
-  }
-
   return response;
 }
 
@@ -41,7 +36,7 @@ type QueryArgs = {
   url: string;
   method?: string;
   body?: unknown;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 };
 
 type QueryError = { status: number; data: unknown };
@@ -73,7 +68,7 @@ export const baseApi = createApi({
     let data;
     try {
       data = text ? JSON.parse(text) : null;
-    } catch (err) {
+    } catch {
       data = text;
     }
 
@@ -82,6 +77,6 @@ export const baseApi = createApi({
     }
     return { error: { status: result.status, data } as QueryError };
   }) as BaseQueryFn<QueryArgs, unknown, QueryError>,
-  tagTypes: ['Audit', 'User'],
+  tagTypes: ['Audit'],
   endpoints: () => ({}),
 });

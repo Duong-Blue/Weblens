@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useCreateAudit, useAuditResult } from "@/features/audit/hooks/useAudit";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { useSocket } from "@/features/audit/hooks/useSocket";
 import { TechStackSection } from "@/features/audit/components/TechStackSection";
 import { CoreMetricsSection } from "@/features/audit/components/CoreMetricsSection";
@@ -12,40 +11,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AuditResult } from "@/types/audit";
+
+type LiveDataType = Partial<AuditResult> & { error?: string };
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState("");
   const [activeAuditId, setActiveAuditId] = useState<string | null>(null);
-  const { isAuthenticated } = useAuthContext();
 
-  const [liveData, setLiveData] = useState<any>(null);
+  const [liveData, setLiveData] = useState<LiveDataType | null>(null);
   const [liveStatus, setLiveStatus] = useState<string>("");
 
   const [createAudit, { isLoading: isCreating, isError: isCreateError, error: createError }] = useCreateAudit();
 
   const socket = useSocket(process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000");
 
-  const { data: auditData, isLoading: isPolling, refetch } = useAuditResult(isAuthenticated ? activeAuditId : null);
+  const { data: auditData, isLoading: isPolling, refetch } = useAuditResult(activeAuditId);
 
   useEffect(() => {
     if (socket && activeAuditId) {
       console.log(`Subscribing to WS event: audit-progress-${activeAuditId}`);
-      socket.on(`audit-progress-${activeAuditId}`, (payload: any) => {
+      socket.on(`audit-progress-${activeAuditId}`, (payload: { step: string; data?: Partial<AuditResult> & { errorMessage?: string } }) => {
         console.log(`WS Payload received for ${activeAuditId}:`, payload);
         setLiveStatus(payload.step);
 
         if (payload.step === 'analyzed') {
-          setLiveData((prev: any) => ({ ...prev, ...payload.data }));
+          setLiveData((prev: LiveDataType | null) => ({ ...prev, ...payload.data }));
           setLiveStatus('analyzed');
         }
 
         if (payload.step === 'summarized') {
-          setLiveData((prev: any) => ({ ...prev, aiSummary: payload.data.aiSummary }));
+          setLiveData((prev: LiveDataType | null) => ({ ...prev, aiSummary: payload.data?.aiSummary }));
           setLiveStatus('summarized');
         }
 
-        if (payload.step === 'completed') {
+        if (payload.step === 'completed' && payload.data) {
           setLiveData(payload.data);
           setLiveStatus('completed');
           if (refetch) refetch();
@@ -53,7 +54,7 @@ export default function Home() {
 
         if (payload.step === 'failed') {
           setLiveStatus('failed');
-          setLiveData((prev: any) => ({ ...prev, error: payload.data?.errorMessage }));
+          setLiveData((prev: LiveDataType | null) => ({ ...prev, error: payload.data?.errorMessage }));
         }
       });
     }
@@ -65,19 +66,19 @@ export default function Home() {
     };
   }, [socket, activeAuditId, refetch]);
 
-  const status = liveStatus || (auditData as any)?.data?.audit?.status;
-  const result = liveData || (auditData as any)?.data?.result;
+  const status = liveStatus || (auditData as { data?: { audit?: { status?: string } } })?.data?.audit?.status;
+  const result = liveData || (auditData as { data?: { result?: AuditResult } })?.data?.result;
   const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling' || status === 'analyzed' || status === 'summarized';
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (activeAuditId && isAuditRunning && isAuthenticated) {
+    if (activeAuditId && isAuditRunning) {
       interval = setInterval(() => {
         if (refetch) refetch();
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [activeAuditId, isAuditRunning, refetch, isAuthenticated]);
+  }, [activeAuditId, isAuditRunning, refetch]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,9 +103,9 @@ export default function Home() {
     setLiveData(null);
     setLiveStatus("");
 
-    createAudit({ url: submitUrl, anonymous: !isAuthenticated })
+    createAudit({ url: submitUrl, anonymous: true })
       .unwrap()
-      .then((res: any) => {
+      .then((res: { audit?: { id?: string }, data?: { audit?: { id?: string } } }) => {
         const auditId = res?.audit?.id || res?.data?.audit?.id;
         if (auditId) {
           setActiveAuditId(auditId);
@@ -165,7 +166,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-zinc-900 flex items-center gap-3">
                 Báo cáo cho
                 <span className="px-4 py-1.5 bg-zinc-900/5 text-zinc-800 rounded-lg font-semibold text-lg ml-1 border border-zinc-900/10 shadow-sm">
-                  {(auditData as any)?.data?.audit?.url || url}
+                  {(auditData as { data?: { audit?: { url?: string } } })?.data?.audit?.url || url}
                 </span>
               </h2>
               <div className="flex items-center gap-3">
@@ -232,7 +233,7 @@ export default function Home() {
                 <span className="font-semibold text-xl text-zinc-900">Đánh giá thất bại</span>
                 <span className="text-zinc-500 max-w-md">
                   {isCreateError ? (createError as Error & { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể tạo yêu cầu đánh giá." :
-                    (liveData?.error?.includes("ERR_NAME_NOT_RESOLVED") || (auditData as any)?.data?.result?.error?.includes("ERR_NAME_NOT_RESOLVED")
+                    (liveData?.error?.includes("ERR_NAME_NOT_RESOLVED") || (auditData as { data?: { result?: { error?: string } } })?.data?.result?.error?.includes("ERR_NAME_NOT_RESOLVED")
                       ? "Không thể phân giải tên miền. Vui lòng kiểm tra lại URL và thử lại."
                       : "Vui lòng kiểm tra lại URL và thử lại.")}
                 </span>

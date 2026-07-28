@@ -4,7 +4,7 @@ COPY . .
 RUN npm ci
 
 FROM base AS builder
-RUN npm run build --workspaces --if-present
+RUN npm run build --prefix apps/api
 
 FROM node:22-alpine AS runner
 WORKDIR /app

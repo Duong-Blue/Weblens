@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppGateway } from '../src/websocket/app.gateway';
 import { QueueEventsListener } from '../src/websocket/queue-events.listener';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Audit } from '@weblens/shared-types';
 import { QueueEvents } from 'bullmq';
 
 jest.mock('bullmq', () => ({
@@ -25,10 +23,6 @@ describe('WebSocket Integration (e2e)', () => {
       providers: [
         AppGateway,
         QueueEventsListener,
-        {
-          provide: getRepositoryToken(Audit),
-          useValue: {},
-        },
       ],
     }).compile();
 

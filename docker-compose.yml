@@ -1,12 +1,4 @@
 services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: weblens
-    ports:
-      - "3306:3306"
-
   redis:
     image: redis:alpine
     ports:
@@ -18,34 +10,24 @@ services:
       dockerfile: apps/api/Dockerfile
     ports:
       - "4000:4000"
+    env_file:
+      - ./weblens-backend/.env
     environment:
-      DATABASE_URL: mysql://root:password@mysql:3306/weblens
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: password
-      DB_NAME: weblens
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
-      - mysql
       - redis
 
   worker:
     build:
       context: ./weblens-backend
       dockerfile: apps/worker/Dockerfile
+    env_file:
+      - ./weblens-backend/.env
     environment:
-      DATABASE_URL: mysql://root:password@mysql:3306/weblens
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: password
-      DB_NAME: weblens
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
-      - mysql
       - redis
 
   frontend:
