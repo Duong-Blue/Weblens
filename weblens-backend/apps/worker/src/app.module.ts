@@ -19,6 +19,7 @@ import { AuditProcessor } from './audit-processor';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisModule } from './redis/redis.module';
+import { MozObservatoryService } from './ai-service/moz-observatory.service';
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { RedisModule } from './redis/redis.module';
     HtmlCheckerService,
     CssCheckerService,
     HtmlCssMapperService,
-    TechDetectorService
+    TechDetectorService,
+    MozObservatoryService
   ],
 })
 export class AppModule {}

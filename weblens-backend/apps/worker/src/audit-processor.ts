@@ -6,6 +6,7 @@ import { AuditLogicService, ScoringService, EngineScore, AxeRunnerService, WcagM
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
+import { MozObservatoryService } from './ai-service/moz-observatory.service';
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
 export class AuditProcessor extends WorkerHost {
@@ -23,6 +24,7 @@ export class AuditProcessor extends WorkerHost {
     private readonly htmlCssMapperService: HtmlCssMapperService,
     private readonly techDetectorService: TechDetectorService,
     private readonly redisService: RedisService,
+    private readonly mozObservatoryService: MozObservatoryService,
   ) {
     super();
   }
@@ -69,7 +71,27 @@ export class AuditProcessor extends WorkerHost {
       
       (comprehensiveAuditData as any).securityScore = securityScoreResult.score;
       (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
-      (comprehensiveAuditData as any).securityMozillaGrade = securityScoreResult.mozillaResult.grade;
+      
+      this.logger.debug(`[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`);
+      try {
+        const hostname = new URL(url).hostname;
+        const mozResult = await this.mozObservatoryService.analyze(hostname);
+        if (mozResult) {
+          (comprehensiveAuditData as any).securityMozillaGrade = mozResult.grade;
+          (comprehensiveAuditData as any).securityMozillaScore = mozResult.score;
+          (comprehensiveAuditData as any).securityMozillaTests = {
+            passed: mozResult.testsPassed || mozResult.tests_passed,
+            failed: mozResult.testsFailed || mozResult.tests_failed,
+          };
+        } else {
+          // Fallback if API returns null
+          (comprehensiveAuditData as any).securityMozillaGrade = securityScoreResult.mozillaResult.grade;
+        }
+      } catch (e) {
+        this.logger.warn(`Mozilla Observatory failed for ${url}, using fallback grade`);
+        // Fallback if unexpected error occurs
+        (comprehensiveAuditData as any).securityMozillaGrade = securityScoreResult.mozillaResult.grade;
+      }
 
       this.logger.debug(`[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`);
       const htmlCssResult = this.htmlCssMapperService.processHtmlCssAudit(crawlData);
