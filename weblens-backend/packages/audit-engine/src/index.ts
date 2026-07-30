@@ -8,3 +8,5 @@ export * from './scoring';
 export * from './engines/accessibility';
 export * from './engines/security';
 export * from './engines/html-css';
+export * from './perf/perf-engine.service';
+export * from './perf/perf-config';

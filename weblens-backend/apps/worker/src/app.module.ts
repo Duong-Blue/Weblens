@@ -13,7 +13,8 @@ import {
   SecurityMapperService, 
   HtmlCheckerService, 
   CssCheckerService, 
-  HtmlCssMapperService 
+  HtmlCssMapperService,
+  PerfEngineService
 } from '@weblens/audit-engine';
 import { AuditProcessor } from './audit-processor';
 import { AiServiceService } from './ai-service/ai-service.service';
@@ -54,7 +55,8 @@ import { MozObservatoryService } from './ai-service/moz-observatory.service';
     CssCheckerService,
     HtmlCssMapperService,
     TechDetectorService,
-    MozObservatoryService
+    MozObservatoryService,
+    PerfEngineService
   ],
 })
 export class AppModule {}

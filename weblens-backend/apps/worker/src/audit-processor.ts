@@ -2,11 +2,15 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { CrawlerService } from './crawler/crawler.service';
-import { AuditLogicService, ScoringService, EngineScore, AxeRunnerService, WcagMapperService, HeaderCheckerService, TlsValidatorService, SecurityMapperService, HtmlCssMapperService } from '@weblens/audit-engine';
+import { AuditLogicService, ScoringService, EngineScore, AxeRunnerService, WcagMapperService, HeaderCheckerService, TlsValidatorService, SecurityMapperService, HtmlCssMapperService, PerfEngineService } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
 import { MozObservatoryService } from './ai-service/moz-observatory.service';
+import { WCAG_REFERENCES } from '../../../packages/audit-engine/src/engines/accessibility/wcag-references';
+import { SECURITY_REFERENCES } from '../../../packages/audit-engine/src/engines/security/security-references';
+import { PERF_REFERENCES } from '../../../packages/audit-engine/src/engines/perf/perf-references';
+import { AuditScreenshot, ReferenceLink } from '@weblens/shared-types';
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
 export class AuditProcessor extends WorkerHost {
@@ -25,6 +29,7 @@ export class AuditProcessor extends WorkerHost {
     private readonly techDetectorService: TechDetectorService,
     private readonly redisService: RedisService,
     private readonly mozObservatoryService: MozObservatoryService,
+    private readonly perfEngineService: PerfEngineService,
   ) {
     super();
   }
@@ -54,6 +59,13 @@ export class AuditProcessor extends WorkerHost {
 
       const comprehensiveAuditData = await this.auditLogicService.performComprehensiveAudit(crawlData, url);
       
+      const perfAnalysis = this.perfEngineService.analyze(crawlData);
+      (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
+      (comprehensiveAuditData as any).performanceIssues = [
+          ...((comprehensiveAuditData as any).performanceIssues || []),
+          ...perfAnalysis.issues
+      ];
+
       this.logger.debug(`[Job ${job.id}] Step 2.5: Running accessibility audit...`);
       const accessibilityResults = await this.axeRunnerService.runAxeOnPage((crawlData as any).page);
       const mappedAccessibilityIssues = await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
@@ -112,12 +124,62 @@ export class AuditProcessor extends WorkerHost {
       if ((comprehensiveAuditData as any).seoIssues) {
         engineScores.push(ScoringService.calculateEngineScore('seo', (comprehensiveAuditData as any).seoIssues));
       }
+      if ((comprehensiveAuditData as any).performanceIssues) {
+        engineScores.push(ScoringService.calculateEngineScore('performance', (comprehensiveAuditData as any).performanceIssues));
+      }
       
       const overallResult = ScoringService.calculateOverallScore(engineScores);
       (comprehensiveAuditData as any).overallScore = overallResult.overallScore;
       (comprehensiveAuditData as any).scoreLabel = overallResult.label;
       (comprehensiveAuditData as any).scoreColor = overallResult.color;
       (comprehensiveAuditData as any).scoreBreakdown = overallResult.breakdown;
+
+      // Extract and map evidence
+      const screenshots: AuditScreenshot[] = [];
+      const referenceLinks: ReferenceLink[] = [];
+
+      if ((crawlData as any).screenshots) {
+        const rawScreenshots = (crawlData as any).screenshots;
+        for (const [viewport, types] of Object.entries(rawScreenshots)) {
+          if ((types as any).viewport) screenshots.push({ viewport, path: (types as any).viewport, fullPage: false, width: 0, height: 0, fileSize: 0 });
+          if ((types as any).fullPage) screenshots.push({ viewport, path: (types as any).fullPage, fullPage: true, width: 0, height: 0, fileSize: 0 });
+        }
+      }
+
+      const addedRefs = new Set<string>();
+      
+      // WCAG Links
+      if ((comprehensiveAuditData as any).accessibility) {
+        for (const issue of (comprehensiveAuditData as any).accessibility) {
+          const match = Object.entries(WCAG_REFERENCES).find(([key]) => issue.id && issue.id.includes(key));
+          if (match && !addedRefs.has(match[1].url)) {
+            referenceLinks.push({ title: match[1].title, url: match[1].url, category: 'wcag' });
+            addedRefs.add(match[1].url);
+          }
+        }
+      }
+
+      // Security Links
+      if ((comprehensiveAuditData as any).securityIssues) {
+        for (const issue of (comprehensiveAuditData as any).securityIssues) {
+          const match = Object.entries(SECURITY_REFERENCES).find(([key]) => issue.id && issue.id.includes(key));
+          if (match && !addedRefs.has(match[1].url)) {
+            referenceLinks.push({ title: match[1].title, url: match[1].url, category: 'security' });
+            addedRefs.add(match[1].url);
+          }
+        }
+      }
+
+      // Perf Links
+      if ((comprehensiveAuditData as any).performanceIssues) {
+        for (const issue of (comprehensiveAuditData as any).performanceIssues) {
+          const match = Object.entries(PERF_REFERENCES).find(([key]) => issue.id && issue.id.includes(key));
+          if (match && !addedRefs.has(match[1].url)) {
+            referenceLinks.push({ title: match[1].title, url: match[1].url, category: 'performance' });
+            addedRefs.add(match[1].url);
+          }
+        }
+      }
 
       this.logger.debug(`[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`);
       await job.updateProgress({ auditId, step: 'analyzed', progress: 70, data: comprehensiveAuditData });
@@ -132,7 +194,10 @@ export class AuditProcessor extends WorkerHost {
 
       let resultData: any = {
         ...comprehensiveAuditData,
+        screenshots,
+        referenceLinks,
         aiSummary: JSON.stringify(aiSummary),
+        aiCategoryAnalysis: aiSummary.categoryAnalysis || {},
         summary: typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
       };
 
