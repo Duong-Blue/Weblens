@@ -86,7 +86,7 @@ Schema:
 - "executiveSummary": string (tóm tắt)
 - "uiUxAnalysis": object (nhận xét layout, typography, nav...)
 - "recommendations": array of objects: "priority"("high"|"medium"|"low"), "area", "action", "impact"
-- "categoryAnalysis": object với các key "performance", "seo", "accessibility", "security". 
+- "categoryAnalysis": object với các key "performance", "seo", "accessibility", "security", "technologies", "network", "structure". 
   Mỗi key chứa object: { "analysis": string (phân tích chuyên sâu), "fixRecommendations": string[] (các bước sửa cụ thể) }
 
 Data:

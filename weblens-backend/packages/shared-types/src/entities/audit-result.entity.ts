@@ -1,3 +1,18 @@
+export interface AuditScreenshot {
+  viewport: string;
+  path: string;
+  width: number;
+  height: number;
+  fullPage: boolean;
+  fileSize: number;
+}
+
+export interface ReferenceLink {
+  title: string;
+  url: string;
+  category: 'wcag' | 'security' | 'performance' | 'seo' | 'best-practice';
+}
+
 export interface PerfDetails {
   loadTimeMs: number;
   timing: any;
@@ -120,6 +135,10 @@ export interface AuditResult {
   auditId: string;
   audit: any; // Keep loosely typed if needed, or remove if unused, but per instructions don't change fields. We'll use any as Audit entity was removed.
 
+  // Evidence
+  screenshots?: AuditScreenshot[];
+  referenceLinks?: ReferenceLink[];
+
   // 1. Performance
   perfScore: number;
   perfDetails: PerfDetails | null;
@@ -153,5 +172,6 @@ export interface AuditResult {
 
   // 10. AI Insights & Recommendations
   aiSummary: string | null;
+  aiCategoryAnalysis?: Record<string, { analysis: string; fixRecommendations: string[] }>;
   summary: string | null; // Keep for backward compatibility if needed temporarily
 }

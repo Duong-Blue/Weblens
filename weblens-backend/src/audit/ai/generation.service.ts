@@ -50,6 +50,12 @@ export interface AIGenerationOutput {
     estimatedFixTime: string;
   }>;
   recommendations: AIRecommendation[];
+  categoryAnalysis?: Record<string, {
+    analysis: string;
+    fixRecommendations: string[];
+    commonMistakes?: string[];
+    estimatedFixTime?: string;
+  }>;
   competitiveContext?: string;
   actionPlan: {
     immediate: string[];
@@ -119,6 +125,24 @@ Then list top 5 recommendations with estimated impact.
         relatedIssues: [ei.issue.issue.id],
         references: []
       })).slice(0, 5),
+      categoryAnalysis: {
+        performance: {
+          analysis: "Performance can be improved, focusing on initial load times and resource sizes.",
+          fixRecommendations: ["Optimize images", "Minify JS/CSS", "Leverage browser caching"]
+        },
+        seo: {
+          analysis: "Basic SEO is good, but semantic structure could be enhanced.",
+          fixRecommendations: ["Add missing meta tags", "Improve H1-H3 hierarchy"]
+        },
+        accessibility: {
+          analysis: "Some accessibility issues present, mainly related to ARIA attributes.",
+          fixRecommendations: ["Add alt text to all images", "Ensure proper ARIA roles"]
+        },
+        security: {
+          analysis: "Basic security headers are present.",
+          fixRecommendations: ["Implement strict CSP", "Add HSTS header"]
+        }
+      },
       actionPlan: {
         immediate: input.enhancedIssues.filter(ei => ei.issue.fixUrgency === 'immediate').map(ei => ei.issue.issue.id),
         shortTerm: [],

@@ -15,6 +15,9 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REPORTS_DIR: /app/reports
+    volumes:
+      - ./weblens-backend/reports:/app/reports
     depends_on:
       - redis
 
@@ -27,6 +30,9 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REPORTS_DIR: /app/reports
+    volumes:
+      - ./weblens-backend/reports:/app/reports
     depends_on:
       - redis
 
