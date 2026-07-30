@@ -15,9 +15,8 @@ export class AuditLogicService {
   async performComprehensiveAudit(crawlData: CrawlResult, url: string): Promise<ComprehensiveAuditData> {
     const $ = cheerio.load(crawlData.htmlContent);
 
-    // 1. Performance
+    // 1. Performance details (scoring moved to PerfEngineService)
     const loadTime = crawlData.performanceTiming.loadEventEnd - crawlData.performanceTiming.navigationStart;
-    const perfScore = loadTime < 3000 ? 100 : (loadTime < 6000 ? 70 : 40);
     
     // Performance Budget Analysis
     const totalRequestCount = crawlData.networkRequests.length;
@@ -417,7 +416,7 @@ export class AuditLogicService {
     };
 
     return {
-      perfScore, perfDetails,
+      perfDetails,
       seoScore, seoDetails,
       accScore, accDetails,
       securityScore, securityDetails,

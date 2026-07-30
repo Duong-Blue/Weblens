@@ -271,7 +271,7 @@ export class CrawlerService {
   }
 
   private async captureScreenshots(page: Page, url: string) {
-    const reportDir = path.resolve(process.cwd(), '../../reports');
+    const reportDir = process.env.REPORTS_DIR || path.resolve(process.cwd(), 'reports');
     if (!fs.existsSync(reportDir)) {
       fs.mkdirSync(reportDir, { recursive: true });
     }
@@ -307,7 +307,7 @@ export class CrawlerService {
       const vpBuffer = await page.screenshot({ path: vpPath, fullPage: false });
       screenshots.viewport[device as keyof typeof viewports] = {
         viewport: device,
-        path: path.relative(process.cwd(), vpPath),
+        path: `${domain}/${timestamp}/${device}-viewport.png`,
         width: size.width,
         height: size.height,
         fullPage: false,
@@ -323,7 +323,7 @@ export class CrawlerService {
         const fpBuffer = await page.screenshot({ path: fpPath, fullPage: true });
         screenshots.fullPage[device as keyof typeof screenshots.fullPage] = {
           viewport: device,
-          path: path.relative(process.cwd(), fpPath),
+          path: `${domain}/${timestamp}/${device}-full.png`,
           width: size.width,
           height: size.height,
           fullPage: true,
@@ -354,41 +354,7 @@ export class CrawlerService {
     consoleMessages: ConsoleMessageEntry[];
     htmlContent: string;
   }): LighthouseData {
-    const { performanceTiming, cwv, networkRequests, consoleMessages, htmlContent } = data;
-
-    // --- Performance Score ---
-    const loadTime =
-      (performanceTiming.loadEventEnd || 0) - (performanceTiming.navigationStart || 0);
-    let perfScore = 100;
-
-    // Load time penalties
-    if (loadTime > 6000) perfScore -= 40;
-    else if (loadTime > 4000) perfScore -= 25;
-    else if (loadTime > 2000) perfScore -= 10;
-
-    // Core Web Vitals penalties
-    if (cwv.lcp !== undefined && cwv.lcp > 4000) perfScore -= 20;
-    else if (cwv.lcp !== undefined && cwv.lcp > 2500) perfScore -= 10;
-
-    if (cwv.cls !== undefined && cwv.cls > 0.25) perfScore -= 20;
-    else if (cwv.cls !== undefined && cwv.cls > 0.1) perfScore -= 10;
-
-    // Network penalties
-    const totalRequests = networkRequests.length;
-    if (totalRequests > 100) perfScore -= 20;
-    else if (totalRequests > 50) perfScore -= 10;
-
-    const failedRequests = networkRequests.filter((r) => r.status >= 400).length;
-    perfScore -= Math.min(failedRequests * 2, 10);
-
-    // Count render-blocking-like resources (scripts, stylesheets)
-    const renderBlockingCount = networkRequests.filter(
-      (r) => r.resourceType === 'script' || r.resourceType === 'stylesheet',
-    ).length;
-    if (renderBlockingCount > 20) perfScore -= 10;
-    else if (renderBlockingCount > 10) perfScore -= 5;
-
-    perfScore = Math.max(0, Math.min(100, Math.round(perfScore)));
+    const { consoleMessages, htmlContent, networkRequests } = data;
 
     // --- Accessibility Score ---
     let accScore = 100;
@@ -491,7 +457,7 @@ export class CrawlerService {
 
     seoScore = Math.max(0, Math.min(100, Math.round(seoScore)));
 
-    return { performance: perfScore, accessibility: accScore, bestPractices: bpScore, seo: seoScore };
+    return { performance: 0, accessibility: accScore, bestPractices: bpScore, seo: seoScore };
   }
 
   private async fetchSitemap(targetUrl: string): Promise<SitemapInfo> {

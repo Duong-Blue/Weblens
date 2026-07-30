@@ -131,7 +131,8 @@ export interface UiUxDetails {
 }
 
 export interface ComprehensiveAuditData {
-  perfScore: number;
+  perfScore?: number;
+  perfIssues?: any[];
   perfDetails: PerfDetails;
   seoScore: number;
   seoDetails: SeoDetails;
@@ -139,7 +140,7 @@ export interface ComprehensiveAuditData {
   accDetails: AccDetails;
   securityScore: number;
   securityDetails: SecurityDetails;
-  techStack: TechStack;
+  techStack: any;
   networkDetails: NetworkDetails;
   structureDetails: StructureDetails;
   jsErrorsDetails: JsErrorsDetails;
