@@ -37,7 +37,7 @@ export default function Home() {
       socket.on(eventName, (payload: unknown) => {
         console.log(`WS Payload received for ${activeAuditId}:`, payload);
         
-        const parsedPayload: any = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
         
         const { step, data } = parsedPayload;
         
@@ -77,8 +77,6 @@ export default function Home() {
   const status = liveStatus || (auditData as { data?: { audit?: { status?: string } } })?.data?.audit?.status;
   const result = liveData || (auditData as { data?: { result?: AuditResult } })?.data?.result;
   const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling';
-
-  const isAuditAnalyzing = status === 'analyzed' || status === 'summarized';
 
   const downloadExport = async () => {
     if (!activeAuditId) return;
@@ -304,7 +302,7 @@ export default function Home() {
                     }
                     analysis={result.aiCategoryAnalysis?.performance?.analysis}
                     fixSteps={result.aiCategoryAnalysis?.performance?.fixRecommendations}
-                    links={result.referenceLinks?.filter((l: any) => l.category === 'performance')} 
+                    links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'performance')} 
                   />
 
                   <MetricBlock 
@@ -338,7 +336,7 @@ export default function Home() {
                     }
                     analysis={result.aiCategoryAnalysis?.seo?.analysis}
                     fixSteps={result.aiCategoryAnalysis?.seo?.fixRecommendations}
-                    links={result.referenceLinks?.filter((l: any) => l.category === 'seo')} 
+                    links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'seo')} 
                   />
 
                   <MetricBlock 
@@ -360,7 +358,7 @@ export default function Home() {
                     }
                     analysis={result.aiCategoryAnalysis?.accessibility?.analysis}
                     fixSteps={result.aiCategoryAnalysis?.accessibility?.fixRecommendations}
-                    links={result.referenceLinks?.filter((l: any) => l.category === 'wcag')} 
+                    links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'wcag')} 
                   />
 
                   <MetricBlock 
@@ -384,7 +382,7 @@ export default function Home() {
                     }
                     analysis={result.aiCategoryAnalysis?.security?.analysis}
                     fixSteps={result.aiCategoryAnalysis?.security?.fixRecommendations}
-                    links={result.referenceLinks?.filter((l: any) => l.category === 'security')} 
+                    links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'security')} 
                   />
                 </section>
 

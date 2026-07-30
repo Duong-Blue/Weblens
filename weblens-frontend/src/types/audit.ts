@@ -99,7 +99,7 @@ export interface TechItem {
   category: string;
   confidence: number;
   version?: string;
-  evidence: any;
+  evidence: unknown;
   isDeprecated: boolean;
   endOfLife?: string;
 }
