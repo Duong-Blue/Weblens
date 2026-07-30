@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useCreateAudit, useAuditResult } from "@/features/audit/hooks/useAudit";
 import { useSocket } from "@/features/audit/hooks/useSocket";
 import { TechStackSection } from "@/features/audit/components/TechStackSection";
-import { CoreMetricsSection } from "@/features/audit/components/CoreMetricsSection";
-import { DetailedMetricsSection } from "@/features/audit/components/DetailedMetricsSection";
 import { AiSummarySection } from "@/features/audit/components/AiSummarySection";
+import { MetricBlock } from "@/features/audit/components/MetricBlock";
+import { ScreenshotGallery } from "@/features/audit/components/ScreenshotGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -31,35 +31,43 @@ export default function Home() {
 
   useEffect(() => {
     if (socket && activeAuditId) {
-      console.log(`Subscribing to WS event: audit-progress-${activeAuditId}`);
-      socket.on(`audit-progress-${activeAuditId}`, (payload: { step: string; data?: Partial<AuditResult> & { errorMessage?: string } }) => {
+      const eventName = `audit-progress-${activeAuditId}`;
+      console.log(`Subscribing to WS event: ${eventName}`);
+      
+      socket.on(eventName, (payload: any) => {
         console.log(`WS Payload received for ${activeAuditId}:`, payload);
-        setLiveStatus(payload.step);
+        
+        const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        
+        const { step, data } = parsedPayload;
+        
+        setLiveStatus(step);
 
-        if (payload.step === 'analyzed') {
-          setLiveData((prev: LiveDataType | null) => ({ ...prev, ...payload.data }));
+        if (step === 'analyzed') {
+          setLiveData((prev: LiveDataType | null) => ({ ...prev, ...data }));
           setLiveStatus('analyzed');
         }
 
-        if (payload.step === 'summarized') {
-          setLiveData((prev: LiveDataType | null) => ({ ...prev, aiSummary: payload.data?.aiSummary }));
+        if (step === 'summarized') {
+          setLiveData((prev: LiveDataType | null) => ({ ...prev, aiSummary: data?.aiSummary }));
           setLiveStatus('summarized');
         }
 
-        if (payload.step === 'completed' && payload.data) {
-          setLiveData(payload.data);
+        if (step === 'completed' && data) {
+          setLiveData(data);
           setLiveStatus('completed');
         }
 
-        if (payload.step === 'failed') {
+        if (step === 'failed') {
           setLiveStatus('failed');
-          setLiveData((prev: LiveDataType | null) => ({ ...prev, error: payload.data?.errorMessage }));
+          setLiveData((prev: LiveDataType | null) => ({ ...prev, error: data?.errorMessage }));
         }
       });
     }
 
     return () => {
       if (socket && activeAuditId) {
+        console.log(`Unsubscribing from WS event: audit-progress-${activeAuditId}`);
         socket.off(`audit-progress-${activeAuditId}`);
       }
     };
@@ -253,8 +261,122 @@ export default function Home() {
             {result && (
               <div className="p-10 sm:p-14 space-y-16">
                 <TechStackSection techStack={result.techStack} />
-                <CoreMetricsSection result={result} />
-                <DetailedMetricsSection result={result} />
+                <ScreenshotGallery screenshots={result.screenshots} />
+                
+                <section>
+                  <h3 className="text-xl font-semibold text-zinc-900 mb-8">Detailed Analysis</h3>
+                  
+                  <MetricBlock 
+                    title="Performance" 
+                    score={result.perfScore ?? 0} 
+                    details={
+                      <ul className="space-y-4 text-sm">
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Load Time</span>
+                          <span className="font-bold text-zinc-900">{result.perfDetails?.loadTimeMs || 0} ms</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Heavy Resources</span>
+                          <span className="font-bold text-zinc-900">{result.perfDetails?.heavyResources || 0} files</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Total Requests</span>
+                          <span className="font-bold text-zinc-900">{result.networkDetails?.totalRequests || 0}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">JS Errors</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${(result.jsErrorsDetails?.errorCount ?? 0) > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {result.jsErrorsDetails?.errorCount || 0}
+                          </span>
+                        </li>
+                      </ul>
+                    }
+                    analysis={result.aiCategoryAnalysis?.performance?.analysis}
+                    fixSteps={result.aiCategoryAnalysis?.performance?.fixRecommendations}
+                    links={result.referenceLinks?.filter((l: any) => l.category === 'performance')} 
+                  />
+
+                  <MetricBlock 
+                    title="SEO" 
+                    score={result.seoScore ?? 0} 
+                    details={
+                      <ul className="space-y-4 text-sm">
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Title Tag</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${result.seoDetails?.hasTitle ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {result.seoDetails?.hasTitle ? "Present" : "Missing"}
+                          </span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Meta Description</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${result.seoDetails?.hasMetaDescription ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {result.seoDetails?.hasMetaDescription ? "Present" : "Missing"}
+                          </span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">H1 Heading</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${result.seoDetails?.hasH1 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {result.seoDetails?.hasH1 ? `${result.seoDetails.h1Count} found` : "Missing"}
+                          </span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Total Links</span>
+                          <span className="font-bold text-zinc-900">{result.seoDetails?.linksCount || 0}</span>
+                        </li>
+                      </ul>
+                    }
+                    analysis={result.aiCategoryAnalysis?.seo?.analysis}
+                    fixSteps={result.aiCategoryAnalysis?.seo?.fixRecommendations}
+                    links={result.referenceLinks?.filter((l: any) => l.category === 'seo')} 
+                  />
+
+                  <MetricBlock 
+                    title="Accessibility" 
+                    score={result.accScore ?? 0} 
+                    details={
+                      <ul className="space-y-4 text-sm">
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Missing Aria Labels</span>
+                          <span className="font-bold text-zinc-900">{result.accDetails?.missingAriaLabels || 0}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Image Alt Tags Missing</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${(result.accDetails?.imagesWithoutAlt ?? 0) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {result.accDetails?.imagesWithoutAlt || 0}
+                          </span>
+                        </li>
+                      </ul>
+                    }
+                    analysis={result.aiCategoryAnalysis?.accessibility?.analysis}
+                    fixSteps={result.aiCategoryAnalysis?.accessibility?.fixRecommendations}
+                    links={result.referenceLinks?.filter((l: any) => l.category === 'wcag')} 
+                  />
+
+                  <MetricBlock 
+                    title="Security" 
+                    score={result.securityScore ?? 0} 
+                    details={
+                      <ul className="space-y-4 text-sm">
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">HTTPS Usage</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${result.securityDetails?.isHttps ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                            {result.securityDetails?.isHttps ? "Secure" : "Insecure"}
+                          </span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Cookie Security</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${result.securityDetails?.cookies?.missingSecure === 0 ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                            {result.securityDetails?.cookies?.missingSecure === 0 ? "All Secure" : `${result.securityDetails?.cookies?.missingSecure || 0} insecure`}
+                          </span>
+                        </li>
+                      </ul>
+                    }
+                    analysis={result.aiCategoryAnalysis?.security?.analysis}
+                    fixSteps={result.aiCategoryAnalysis?.security?.fixRecommendations}
+                    links={result.referenceLinks?.filter((l: any) => l.category === 'security')} 
+                  />
+                </section>
+
                 <AiSummarySection aiSummary={result.aiSummary} />
                 <div className="flex justify-center mt-12">
                   <Button onClick={downloadExport} className="px-8 py-4 font-semibold text-lg bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all hover:scale-105">
@@ -269,3 +391,4 @@ export default function Home() {
     </div>
   );
 }
+

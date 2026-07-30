@@ -11,12 +11,23 @@ export const useSocket = (customUrl?: string) => {
       reconnectionDelay: 1000,
       reconnection: true,
       reconnectionAttempts: 10,
-      agent: false,
-      upgrade: false,
-      rejectUnauthorized: false
+      path: '/socket.io', // Ensure standard socket.io path is used
+      autoConnect: true
+    });
+
+    socketInstance.on('connect', () => {
+      console.log('Socket connected successfully:', socketInstance.id);
+    });
+
+    socketInstance.on('connect_error', (err) => {
+      console.error('Socket connection error:', err);
+    });
+
+    socketInstance.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
     });
     
-    setTimeout(() => setSocket(socketInstance), 0);
+    setSocket(socketInstance);
     
     return () => {
       socketInstance.disconnect();
