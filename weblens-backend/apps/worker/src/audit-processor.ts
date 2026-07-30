@@ -210,7 +210,7 @@ export class AuditProcessor extends WorkerHost {
       await this.redisService.setAuditResult(auditId, resultData);
       
       this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
-      await job.updateProgress({ auditId, step: 'completed', progress: 100, data: JSON.parse(JSON.stringify(resultData)) });
+      await job.updateProgress({ auditId, step: 'completed', progress: 100 });
 
       return { success: true, result: resultData };
     } catch (error: any) {

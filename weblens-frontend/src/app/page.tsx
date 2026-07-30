@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCreateAudit, useAuditResult } from "@/features/audit/hooks/useAudit";
+import { useCreateAudit, useLazyAuditResult } from "@/features/audit/hooks/useAudit";
 import { useSocket } from "@/features/audit/hooks/useSocket";
 import { TechStackSection } from "@/features/audit/components/TechStackSection";
 import { AiSummarySection } from "@/features/audit/components/AiSummarySection";
@@ -27,17 +27,17 @@ export default function Home() {
 
   const socket = useSocket(process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000");
 
-  const { data: auditData, isLoading } = useAuditResult(activeAuditId);
+  const [triggerFetch, { data: auditData }] = useLazyAuditResult();
 
   useEffect(() => {
     if (socket && activeAuditId) {
       const eventName = `audit-progress-${activeAuditId}`;
       console.log(`Subscribing to WS event: ${eventName}`);
       
-      socket.on(eventName, (payload: any) => {
+      socket.on(eventName, (payload: unknown) => {
         console.log(`WS Payload received for ${activeAuditId}:`, payload);
         
-        const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        const parsedPayload: any = typeof payload === 'string' ? JSON.parse(payload) : payload;
         
         const { step, data } = parsedPayload;
         
@@ -53,9 +53,10 @@ export default function Home() {
           setLiveStatus('summarized');
         }
 
-        if (step === 'completed' && data) {
+        if (step === 'completed' && data && !auditData) {
           setLiveData(data);
           setLiveStatus('completed');
+          triggerFetch(activeAuditId);
         }
 
         if (step === 'failed') {
@@ -71,11 +72,13 @@ export default function Home() {
         socket.off(`audit-progress-${activeAuditId}`);
       }
     };
-  }, [socket, activeAuditId]);
+  }, [socket, activeAuditId, triggerFetch, auditData]);
 
   const status = liveStatus || (auditData as { data?: { audit?: { status?: string } } })?.data?.audit?.status;
   const result = liveData || (auditData as { data?: { result?: AuditResult } })?.data?.result;
-  const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling' || status === 'analyzed' || status === 'summarized';
+  const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling';
+
+  const isAuditAnalyzing = status === 'analyzed' || status === 'summarized';
 
   const downloadExport = async () => {
     if (!activeAuditId) return;
@@ -195,14 +198,12 @@ export default function Home() {
               </div>
             </div>
 
-            {isAuditRunning && !result && !isCreateError && (
+            {isAuditRunning && !isCreateError && (
               <div className="p-10 sm:p-14 space-y-12">
                 <div className="flex items-center gap-4 text-blue-700 mb-6 bg-blue-50/80 p-5 rounded-2xl border border-blue-100/60 shadow-sm backdrop-blur-sm">
                   <div className="w-7 h-7 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
                   <span className="font-semibold text-lg">
-                    {status === 'crawling' ? 'Bước 1: Đang thu thập dữ liệu website...' :
-                      status === 'analyzed' ? 'Bước 2: AI đang phân tích...' :
-                        'Đang chuẩn bị đánh giá...'}
+                    {status === 'crawling' ? 'Bước 1: Đang thu thập dữ liệu website...' : 'Đang chuẩn bị đánh giá...'}
                   </span>
                 </div>
 
@@ -261,7 +262,17 @@ export default function Home() {
             {result && (
               <div className="p-10 sm:p-14 space-y-16">
                 <TechStackSection techStack={result.techStack} />
-                <ScreenshotGallery screenshots={result.screenshots} />
+                
+                {result.screenshots ? (
+                  <ScreenshotGallery screenshots={result.screenshots} />
+                ) : (
+                  <div className="flex items-center justify-center p-12 bg-zinc-50 rounded-3xl border border-zinc-200/50 shadow-sm animate-pulse">
+                    <div className="flex flex-col items-center gap-3 text-zinc-400">
+                      <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-500 rounded-full animate-spin"></div>
+                      <span className="font-medium">Generating screenshots...</span>
+                    </div>
+                  </div>
+                )}
                 
                 <section>
                   <h3 className="text-xl font-semibold text-zinc-900 mb-8">Detailed Analysis</h3>
@@ -378,6 +389,14 @@ export default function Home() {
                 </section>
 
                 <AiSummarySection aiSummary={result.aiSummary} />
+                {(!result.aiSummary && liveStatus === 'analyzed') && (
+                  <div className="flex items-center justify-center p-8 mt-4 bg-zinc-50 rounded-2xl border border-zinc-200/50 shadow-sm animate-pulse">
+                    <div className="flex items-center gap-3 text-zinc-500">
+                      <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin"></div>
+                      <span className="font-medium text-sm">AI is summarizing the results...</span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex justify-center mt-12">
                   <Button onClick={downloadExport} className="px-8 py-4 font-semibold text-lg bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all hover:scale-105">
                     Export JSON
