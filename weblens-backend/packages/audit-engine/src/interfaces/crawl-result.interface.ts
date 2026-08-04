@@ -291,8 +291,6 @@ export interface ScreenshotItem {
   path: string;
   width: number;
   height: number;
-  fullPage: boolean;
-  darkMode: boolean;
   fileSize: number;
   format: 'png' | 'jpeg' | 'webp';
   timestamp: number;
@@ -379,23 +377,7 @@ export interface CrawlResult {
     session: boolean;
   }>;
 
-  screenshots?: {
-    viewport: {
-      desktop: ScreenshotItem;
-      laptop?: ScreenshotItem;
-      tablet: ScreenshotItem;
-      mobile: ScreenshotItem;
-      'mobile-small'?: ScreenshotItem;
-    };
-    fullPage: {
-      desktop: ScreenshotItem;
-      mobile: ScreenshotItem;
-    };
-    darkMode?: {
-      desktop: ScreenshotItem;
-      mobile: ScreenshotItem;
-    };
-  };
+  screenshots?: ScreenshotItem[];
 
   domStats?: DOMStatistics;
   headingHierarchy?: HeadingHierarchy;
