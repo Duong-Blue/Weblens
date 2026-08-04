@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AuditResult } from "@/types/audit";
+import Link from "next/link";
 
 type LiveDataType = Partial<AuditResult> & { error?: string };
 
@@ -77,27 +78,6 @@ export default function Home() {
   const status = liveStatus || (auditData as { data?: { audit?: { status?: string } } })?.data?.audit?.status;
   const result = liveData || (auditData as { data?: { result?: AuditResult } })?.data?.result;
   const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling';
-
-  const downloadExport = async () => {
-    if (!activeAuditId) return;
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/audits/${activeAuditId}/export`, {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `weblens-audit-${activeAuditId}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    } catch (err) {
-      console.error('Download export failed:', err);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -395,10 +375,12 @@ export default function Home() {
                     </div>
                   </div>
                 )}
-                <div className="flex justify-center mt-12">
-                  <Button onClick={downloadExport} className="px-8 py-4 font-semibold text-lg bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all hover:scale-105">
-                    Export JSON
-                  </Button>
+                <div className="flex justify-center mt-12 gap-4">
+                  <Link href={`/report/${activeAuditId}`}>
+                    <Button variant="outline" className="px-8 py-4 font-semibold text-lg border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-xl shadow-sm transition-all hover:scale-105">
+                      Xem Chi Tiết Báo Cáo
+                    </Button>
+                  </Link>
                 </div>
               </div>
             )}
