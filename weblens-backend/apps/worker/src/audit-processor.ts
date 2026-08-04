@@ -2,7 +2,18 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { CrawlerService } from './crawler/crawler.service';
-import { AuditLogicService, ScoringService, EngineScore, AxeRunnerService, WcagMapperService, HeaderCheckerService, TlsValidatorService, SecurityMapperService, HtmlCssMapperService, PerfEngineService } from '@weblens/audit-engine';
+import {
+  AuditLogicService,
+  ScoringService,
+  EngineScore,
+  AxeRunnerService,
+  WcagMapperService,
+  HeaderCheckerService,
+  TlsValidatorService,
+  SecurityMapperService,
+  HtmlCssMapperService,
+  PerfEngineService,
+} from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
@@ -10,7 +21,46 @@ import { MozObservatoryService } from './ai-service/moz-observatory.service';
 import { WCAG_REFERENCES } from '../../../packages/audit-engine/src/engines/accessibility/wcag-references';
 import { SECURITY_REFERENCES } from '../../../packages/audit-engine/src/engines/security/security-references';
 import { PERF_REFERENCES } from '../../../packages/audit-engine/src/engines/perf/perf-references';
-import { AuditScreenshot, ReferenceLink } from '@weblens/shared-types';
+import {
+  AuditScreenshot,
+  ReferenceLink,
+  AuditResult,
+} from '@weblens/shared-types';
+
+function detectCdn(headers: any): string | undefined {
+  if (!headers) return undefined;
+
+  // Convert headers to a case-insensitive lookup
+  const h: Record<string, string> = {};
+  for (const key in headers) {
+    if (typeof headers[key] === 'string') {
+      h[key.toLowerCase()] = headers[key].toLowerCase();
+    } else if (Array.isArray(headers[key])) {
+      h[key.toLowerCase()] = headers[key].join(', ').toLowerCase();
+    }
+  }
+
+  if (h['cf-ray']) return 'Cloudflare';
+  if (h['x-amz-cf-id']) return 'CloudFront';
+  if (h['x-served-by'] && h['x-served-by'].includes('cache')) return 'Fastly';
+  if (h['x-vercel-id'] || (h['server'] && h['server'].includes('vercel')))
+    return 'Vercel';
+
+  return undefined;
+}
+
+export function flattenScreenshots(raw: unknown): AuditScreenshot[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((s: any) => ({
+      viewport: s.viewport,
+      path: s.path,
+      width: s.width || 0,
+      height: s.height || 0,
+      fileSize: s.fileSize || 0,
+    }))
+    .filter((s) => s.viewport && s.path);
+}
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
 export class AuditProcessor extends WorkerHost {
@@ -36,98 +86,149 @@ export class AuditProcessor extends WorkerHost {
 
   async process(job: Job<any, any, string>): Promise<any> {
     const { auditId, url, anonymous } = job.data;
-    
-    this.logger.log(`[Job ${job.id}] Started processing audit for URL: ${url} (anonymous: ${anonymous})`);
-    
+
+    this.logger.log(
+      `[Job ${job.id}] Started processing audit for URL: ${url} (anonymous: ${anonymous})`,
+    );
+
     try {
       this.logger.debug(`[Job ${job.id}] Step 1: Starting crawl...`);
 
-
       if (!anonymous) {
-          // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
+        // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
       }
-      await job.updateProgress({ auditId, step: 'crawling', progress: 10, data: null });
+      await job.updateProgress({
+        auditId,
+        step: 'crawling',
+        progress: 10,
+        data: null,
+      });
 
       const crawlData = await this.crawlerService.crawl(url);
-      this.logger.debug(`[Job ${job.id}] Step 1 Complete: Crawling finished successfully`);
-      await job.updateProgress({ auditId, step: 'crawled', progress: 40, data: null });
+      this.logger.debug(
+        `[Job ${job.id}] Step 1 Complete: Crawling finished successfully`,
+      );
+      await job.updateProgress({
+        auditId,
+        step: 'crawled',
+        progress: 40,
+        data: null,
+      });
 
       this.logger.debug(`[Job ${job.id}] Step 2: Starting analysis...`);
       if (!anonymous) {
-         // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
+        // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
       }
 
-      const comprehensiveAuditData = await this.auditLogicService.performComprehensiveAudit(crawlData, url);
-      
+      const comprehensiveAuditData =
+        await this.auditLogicService.performComprehensiveAudit(crawlData, url);
+
       const perfAnalysis = this.perfEngineService.analyze(crawlData);
       (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
       (comprehensiveAuditData as any).performanceIssues = [
-          ...((comprehensiveAuditData as any).performanceIssues || []),
-          ...perfAnalysis.issues
+        ...((comprehensiveAuditData as any).performanceIssues || []),
+        ...perfAnalysis.issues,
       ];
 
-      this.logger.debug(`[Job ${job.id}] Step 2.5: Running accessibility audit...`);
-      const accessibilityResults = await this.axeRunnerService.runAxeOnPage((crawlData as any).page);
-      const mappedAccessibilityIssues = await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
+      this.logger.debug(
+        `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
+      );
+      const accessibilityResults = await this.axeRunnerService.runAxeOnPage(
+        (crawlData as any).page,
+      );
+      const mappedAccessibilityIssues =
+        await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
       (comprehensiveAuditData as any).accessibility = mappedAccessibilityIssues;
 
       this.logger.debug(`[Job ${job.id}] Step 2.6: Running security audit...`);
       const headers = (crawlData as any).headers || {};
       const tlsInfo = (crawlData as any).tlsInfo || null;
-      
-      const headerResults = this.headerCheckerService.checkSecurityHeaders(headers);
+
+      const headerResults =
+        this.headerCheckerService.checkSecurityHeaders(headers);
       const tlsResults = this.tlsValidatorService.checkTLS(tlsInfo);
-      
+
       const allSecurityIssues = [...headerResults, ...tlsResults];
-      const securityScoreResult = this.securityMapperService.calculateSecurityScore(allSecurityIssues);
-      
+      const securityScoreResult =
+        this.securityMapperService.calculateSecurityScore(allSecurityIssues);
+
       (comprehensiveAuditData as any).securityScore = securityScoreResult.score;
       (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
-      
-      this.logger.debug(`[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`);
+
+      this.logger.debug(
+        `[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`,
+      );
       try {
         const hostname = new URL(url).hostname;
         const mozResult = await this.mozObservatoryService.analyze(hostname);
         if (mozResult) {
-          (comprehensiveAuditData as any).securityMozillaGrade = mozResult.grade;
-          (comprehensiveAuditData as any).securityMozillaScore = mozResult.score;
+          (comprehensiveAuditData as any).securityMozillaGrade =
+            mozResult.grade;
+          (comprehensiveAuditData as any).securityMozillaScore =
+            mozResult.score;
           (comprehensiveAuditData as any).securityMozillaTests = {
             passed: mozResult.testsPassed || mozResult.tests_passed,
             failed: mozResult.testsFailed || mozResult.tests_failed,
           };
         } else {
           // Fallback if API returns null
-          (comprehensiveAuditData as any).securityMozillaGrade = securityScoreResult.mozillaResult.grade;
+          (comprehensiveAuditData as any).securityMozillaGrade =
+            securityScoreResult.mozillaResult.grade;
         }
       } catch (e) {
-        this.logger.warn(`Mozilla Observatory failed for ${url}, using fallback grade`);
+        this.logger.warn(
+          `Mozilla Observatory failed for ${url}, using fallback grade`,
+        );
         // Fallback if unexpected error occurs
-        (comprehensiveAuditData as any).securityMozillaGrade = securityScoreResult.mozillaResult.grade;
+        (comprehensiveAuditData as any).securityMozillaGrade =
+          securityScoreResult.mozillaResult.grade;
       }
 
       this.logger.debug(`[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`);
-      const htmlCssResult = this.htmlCssMapperService.processHtmlCssAudit(crawlData);
+      const htmlCssResult =
+        this.htmlCssMapperService.processHtmlCssAudit(crawlData);
 
       (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
-      (comprehensiveAuditData as any).htmlIssues = htmlCssResult.issues.filter(i => i.id.startsWith('HTML-'));
+      (comprehensiveAuditData as any).htmlIssues = htmlCssResult.issues.filter(
+        (i) => i.id.startsWith('HTML-'),
+      );
       (comprehensiveAuditData as any).cssScore = htmlCssResult.cssScore;
-      (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(i => i.id.startsWith('CSS-'));
+      (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(
+        (i) => i.id.startsWith('CSS-'),
+      );
 
-      this.logger.debug(`[Job ${job.id}] Step 2.7.5: Detecting technology stack...`);
-      const technologies = this.techDetectorService.detect((crawlData as any).htmlContent, (crawlData as any).headers || {});
+      this.logger.debug(
+        `[Job ${job.id}] Step 2.7.5: Detecting technology stack...`,
+      );
+      const technologies = this.techDetectorService.detect(
+        (crawlData as any).htmlContent,
+        (crawlData as any).headers || {},
+      );
       (comprehensiveAuditData as any).technologies = technologies;
 
-      this.logger.debug(`[Job ${job.id}] Step 2.8: Calculating Final Scores...`);
-      
+      this.logger.debug(
+        `[Job ${job.id}] Step 2.8: Calculating Final Scores...`,
+      );
+
       const engineScores: EngineScore[] = [];
-      
+
       if ((comprehensiveAuditData as any).seoIssues) {
-        engineScores.push(ScoringService.calculateEngineScore('seo', (comprehensiveAuditData as any).seoIssues));
+        engineScores.push(
+          ScoringService.calculateEngineScore(
+            'seo',
+            (comprehensiveAuditData as any).seoIssues,
+          ),
+        );
       }
       if ((comprehensiveAuditData as any).performanceIssues) {
-        engineScores.push(ScoringService.calculateEngineScore('performance', (comprehensiveAuditData as any).performanceIssues));
+        engineScores.push(
+          ScoringService.calculateEngineScore(
+            'performance',
+            (comprehensiveAuditData as any).performanceIssues,
+          ),
+        );
       }
-      
+
       const overallResult = ScoringService.calculateOverallScore(engineScores);
       (comprehensiveAuditData as any).overallScore = overallResult.overallScore;
       (comprehensiveAuditData as any).scoreLabel = overallResult.label;
@@ -135,25 +236,23 @@ export class AuditProcessor extends WorkerHost {
       (comprehensiveAuditData as any).scoreBreakdown = overallResult.breakdown;
 
       // Extract and map evidence
-      const screenshots: AuditScreenshot[] = [];
+      const screenshots = flattenScreenshots((crawlData as any).screenshots);
       const referenceLinks: ReferenceLink[] = [];
 
-      if ((crawlData as any).screenshots) {
-        const rawScreenshots = (crawlData as any).screenshots;
-        for (const [viewport, types] of Object.entries(rawScreenshots)) {
-          if ((types as any).viewport) screenshots.push({ viewport, path: (types as any).viewport, fullPage: false, width: 0, height: 0, fileSize: 0 });
-          if ((types as any).fullPage) screenshots.push({ viewport, path: (types as any).fullPage, fullPage: true, width: 0, height: 0, fileSize: 0 });
-        }
-      }
-
       const addedRefs = new Set<string>();
-      
+
       // WCAG Links
       if ((comprehensiveAuditData as any).accessibility) {
         for (const issue of (comprehensiveAuditData as any).accessibility) {
-          const match = Object.entries(WCAG_REFERENCES).find(([key]) => issue.id && issue.id.includes(key));
+          const match = Object.entries(WCAG_REFERENCES).find(
+            ([key]) => issue.id && issue.id.includes(key),
+          );
           if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({ title: match[1].title, url: match[1].url, category: 'wcag' });
+            referenceLinks.push({
+              title: match[1].title,
+              url: match[1].url,
+              category: 'wcag',
+            });
             addedRefs.add(match[1].url);
           }
         }
@@ -162,9 +261,15 @@ export class AuditProcessor extends WorkerHost {
       // Security Links
       if ((comprehensiveAuditData as any).securityIssues) {
         for (const issue of (comprehensiveAuditData as any).securityIssues) {
-          const match = Object.entries(SECURITY_REFERENCES).find(([key]) => issue.id && issue.id.includes(key));
+          const match = Object.entries(SECURITY_REFERENCES).find(
+            ([key]) => issue.id && issue.id.includes(key),
+          );
           if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({ title: match[1].title, url: match[1].url, category: 'security' });
+            referenceLinks.push({
+              title: match[1].title,
+              url: match[1].url,
+              category: 'security',
+            });
             addedRefs.add(match[1].url);
           }
         }
@@ -173,42 +278,82 @@ export class AuditProcessor extends WorkerHost {
       // Perf Links
       if ((comprehensiveAuditData as any).performanceIssues) {
         for (const issue of (comprehensiveAuditData as any).performanceIssues) {
-          const match = Object.entries(PERF_REFERENCES).find(([key]) => issue.id && issue.id.includes(key));
+          const match = Object.entries(PERF_REFERENCES).find(
+            ([key]) => issue.id && issue.id.includes(key),
+          );
           if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({ title: match[1].title, url: match[1].url, category: 'performance' });
+            referenceLinks.push({
+              title: match[1].title,
+              url: match[1].url,
+              category: 'performance',
+            });
             addedRefs.add(match[1].url);
           }
         }
       }
 
-      this.logger.debug(`[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`);
-      await job.updateProgress({ auditId, step: 'analyzed', progress: 70, data: comprehensiveAuditData });
+      this.logger.debug(
+        `[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`,
+      );
+      await job.updateProgress({
+        auditId,
+        step: 'analyzed',
+        progress: 70,
+        data: comprehensiveAuditData,
+      });
 
       this.logger.debug(`[Job ${job.id}] Step 3: Generating AI Summary...`);
       const aiSummary = await this.aiService.generateSummary({
         url,
-        ...comprehensiveAuditData
-      });
-      this.logger.debug(`[Job ${job.id}] Step 3 Complete: AI Summary generated`);
-      await job.updateProgress({ auditId, step: 'summarized', progress: 90, data: { aiSummary: JSON.stringify(aiSummary) } });
-
-      let resultData: any = {
         ...comprehensiveAuditData,
+      });
+      this.logger.debug(
+        `[Job ${job.id}] Step 3 Complete: AI Summary generated`,
+      );
+      await job.updateProgress({
+        auditId,
+        step: 'summarized',
+        progress: 90,
+        data: { aiSummary: JSON.stringify(aiSummary) },
+      });
+
+      const rawHeaders = (crawlData as any).headers || {};
+      const serverHeader =
+        (crawlData as any).mainHeaders?.server ||
+        rawHeaders['server'] ||
+        'Unknown';
+      const cdn =
+        detectCdn((crawlData as any).mainHeaders) || detectCdn(rawHeaders);
+      const serverInfo = {
+        server: serverHeader,
+        cdn: cdn,
+      };
+
+      const resultData: AuditResult = {
+        id: auditId,
+        auditId: auditId,
+        url: url,
+        serverInfo: serverInfo,
+        ...(comprehensiveAuditData as any),
         screenshots,
         referenceLinks,
         aiSummary: JSON.stringify(aiSummary),
         aiCategoryAnalysis: aiSummary.categoryAnalysis || {},
-        summary: typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
+        summary:
+          typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
       };
 
+      this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
+
+      // Close browser after all analysis is done
       if ((crawlData as any).browser) {
-          try { await (crawlData as any).browser.close(); } catch(e) {}
+        try {
+          await (crawlData as any).browser.close();
+        } catch (e) {}
       }
 
-      this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
-      
       await this.redisService.setAuditResult(auditId, resultData);
-      
+
       this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
       await job.updateProgress({ auditId, step: 'completed', progress: 100 });
 
@@ -216,12 +361,32 @@ export class AuditProcessor extends WorkerHost {
     } catch (error: any) {
       this.logger.error(`[Job ${job.id}] Audit failed for ${url}:`, error);
 
-      await job.updateProgress({ 
-        auditId, 
-        step: 'failed', 
-        progress: 100, 
-        data: { errorMessage: error.message || 'Audit failed' } 
+      // Save failure to Redis so frontend can retrieve it
+      try {
+        await this.redisService.setAuditResult(auditId, {
+          error: error.message || 'Audit failed',
+          status: 'failed',
+          url,
+        } as any);
+      } catch (redisError) {
+        this.logger.error(`Failed to save error to Redis: ${redisError}`);
+      }
+
+      await job.updateProgress({
+        auditId,
+        step: 'failed',
+        progress: 100,
+        data: { errorMessage: error.message || 'Audit failed' },
       });
+
+      // DNS errors are permanent - don't retry
+      if (error.message && error.message.includes('ERR_NAME_NOT_RESOLVED')) {
+        this.logger.warn(
+          `[Job ${job.id}] DNS resolution failed for ${url}. Not retrying (permanent error).`,
+        );
+        return { success: false, error: error.message };
+      }
+
       throw error;
     }
   }
@@ -233,7 +398,9 @@ export class AuditProcessor extends WorkerHost {
 
   @OnWorkerEvent('failed')
   onFailed(job: Job, error: Error) {
-    this.logger.error(`Job ${job?.id} failed after ${job?.attemptsMade} attempts. Reason: ${error.message}`);
+    this.logger.error(
+      `Job ${job?.id} failed after ${job?.attemptsMade} attempts. Reason: ${error.message}`,
+    );
   }
 
   @OnWorkerEvent('stalled')
