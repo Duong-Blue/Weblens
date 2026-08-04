@@ -1,0 +1,120 @@
+{
+  "id": "fixture-1",
+  "auditId": "audit-1",
+  "url": "https://example.com",
+  "serverInfo": {
+    "server": "nginx",
+    "cdn": "Cloudflare"
+  },
+  "overallScore": 87,
+  "scoreBreakdown": {
+    "performance": 82,
+    "seo": 91,
+    "accessibility": 78,
+    "security": 85
+  },
+  "perfScore": 82,
+  "seoScore": 91,
+  "accScore": 78,
+  "securityScore": 85,
+  "htmlScore": 80,
+  "cssScore": 76,
+  "perfDetails": {
+    "loadTimeMs": 1420,
+    "coreWebVitals": {
+      "lcp": 1800,
+      "cls": 0.12,
+      "inp": 210
+    },
+    "budget": {},
+    "heavyResources": 14
+  },
+  "seoDetails": {
+    "hasTitle": true,
+    "hasMetaDescription": true,
+    "hasH1": true,
+    "h1Count": 1,
+    "linksCount": 42,
+    "social": {
+      "openGraph": { "title": "Example", "description": "Example desc", "image": "img.png" },
+      "twitter": { "card": "summary", "title": "Example", "description": "Example desc" },
+      "hasJsonLd": true
+    }
+  },
+  "accDetails": {
+    "wcag": [
+      {
+        "id": "wcag-1.1.1",
+        "description": "Non-text Content",
+        "passed": false,
+        "nodes": []
+      }
+    ]
+  },
+  "securityDetails": {
+    "isHttps": true,
+    "headers": {
+      "hasCSP": false,
+      "hasHSTS": true,
+      "hasXFrameOptions": true,
+      "hasXContentTypeOptions": true
+    },
+    "cookies": {
+      "total": 5,
+      "missingSecure": 0,
+      "missingHttpOnly": 1,
+      "missingSameSite": 0
+    },
+    "vulnerabilities": [
+      { "id": "vuln-1", "severity": "medium", "description": "Test vuln" }
+    ],
+    "forms": []
+  },
+  "techStack": {
+    "frameworks": [{ "name": "React", "category": "Framework", "confidence": 1, "isDeprecated": false }],
+    "cms": [{ "name": "WordPress", "category": "CMS", "confidence": 1, "isDeprecated": false }],
+    "hosting": [{ "name": "Vercel", "category": "Hosting", "confidence": 1, "isDeprecated": false }],
+    "analytics": [{ "name": "GA4", "category": "Analytics", "confidence": 1, "isDeprecated": false }]
+  },
+  "networkDetails": {
+    "totalRequests": 61,
+    "summaryByType": {
+      "document": 1,
+      "script": 18,
+      "stylesheet": 6,
+      "image": 27,
+      "font": 9
+    }
+  },
+  "aiSummary": "{\"executiveSummary\":\"Good performance, needs some SEO work.\",\"recommendations\":[]}",
+  "aiCategoryAnalysis": {
+    "performance": { "analysis": "Perf analysis", "fixRecommendations": ["Fix images"] },
+    "seo": { "analysis": "SEO analysis", "fixRecommendations": ["Add meta"] },
+    "accessibility": { "analysis": "A11y analysis", "fixRecommendations": ["Add alt tags"] },
+    "security": { "analysis": "Sec analysis", "fixRecommendations": ["Add CSP"] }
+  },
+  "accessibility": [
+    { "id": "acc-1", "ruleId": "WCAG-IMG-ALT-01", "severity": "high", "status": "fail", "title": "Missing alt text", "description": "Images must have alt text", "category": "accessibility" },
+    { "id": "acc-2", "ruleId": "color-contrast", "severity": "medium", "status": "pass", "title": "Color contrast", "description": "Good contrast", "category": "accessibility" }
+  ],
+  "securityIssues": [
+    { "id": "sec-1", "ruleId": "SEC-HSTS-01", "severity": "high", "status": "fail", "title": "Missing HSTS", "description": "Add HSTS header", "category": "security" },
+    { "id": "sec-2", "ruleId": "x-frame-options", "severity": "low", "status": "pass", "title": "X-Frame-Options", "description": "Header is present", "category": "security" }
+  ],
+  "performanceIssues": [
+    { "id": "PERF-LCP-01", "ruleId": "lcp-issue", "severity": "critical", "status": "fail", "title": "Large hero image", "description": "Optimize LCP image", "category": "performance" },
+    { "id": "perf-2", "ruleId": "unused-js", "severity": "medium", "status": "fail", "title": "Unused JS", "description": "Remove unused JS", "category": "performance" }
+  ],
+  "htmlIssues": [
+    { "id": "html-1", "ruleId": "invalid-html", "severity": "medium", "status": "fail", "title": "Invalid HTML", "description": "Fix invalid tags", "category": "html" }
+  ],
+  "cssIssues": [
+    { "id": "css-1", "ruleId": "invalid-css", "severity": "low", "status": "fail", "title": "Invalid CSS", "description": "Fix invalid props", "category": "css" }
+  ],
+  "screenshots": [
+    { "viewport": "desktop", "path": "screenshots/desktop.png" },
+    { "viewport": "mobile", "path": "screenshots/mobile.png" }
+  ],
+  "referenceLinks": [],
+  "status": "completed"
+}
