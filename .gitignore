@@ -20,3 +20,5 @@ AGENTS.md
 
 # Project specific
 reports/
+weblens-frontend/test-results/
+weblens-frontend/playwright-report/
