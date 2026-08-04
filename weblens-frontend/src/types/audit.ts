@@ -3,7 +3,6 @@ export interface AuditScreenshot {
   path: string;
   width: number;
   height: number;
-  fullPage: boolean;
   fileSize: number;
 }
 

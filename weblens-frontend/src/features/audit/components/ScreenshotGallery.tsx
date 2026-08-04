@@ -21,7 +21,7 @@ export function ScreenshotGallery({ screenshots }: Props) {
 
   return (
     <div className="mt-8 mb-8">
-      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Screenshots</h3>
+      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">SERP Screenshot</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {screenshots.map((s, idx) => (
           <div 
@@ -30,12 +30,12 @@ export function ScreenshotGallery({ screenshots }: Props) {
             onClick={() => setSelectedScreenshot(s)}
           >
             <div className="bg-gray-100 p-2 text-xs font-semibold uppercase text-center border-b">
-              {s.viewport} {s.fullPage ? '(Full Page)' : ''}
+              {s.viewport}
             </div>
             <div className="h-48 relative bg-gray-50 flex items-center justify-center overflow-hidden">
                {/* Using next/image requires domains in next.config.mjs, fallback to standard img if not configured, but sticking to the plan: serve static */}
                <img 
-                 src={`${getBaseUrl()}/${s.path}`} 
+                 src={s.path.startsWith('http') ? s.path : `${getBaseUrl()}/reports/${s.path}`} 
                  alt={`Screenshot ${s.viewport}`}
                  className="object-cover w-full h-full"
                  loading="lazy"
@@ -58,8 +58,8 @@ export function ScreenshotGallery({ screenshots }: Props) {
                &times;
              </button>
              <img 
-                 src={`${getBaseUrl()}/${selectedScreenshot.path}`} 
-                 alt={`Screenshot ${selectedScreenshot.viewport} full`}
+                 src={selectedScreenshot.path.startsWith('http') ? selectedScreenshot.path : `${getBaseUrl()}/reports/${selectedScreenshot.path}`} 
+                 alt={`SERP screenshot ${selectedScreenshot.viewport}`}
                  className="max-w-full h-auto"
                />
           </div>
