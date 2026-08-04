@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ReportModel } from '../reportModel';
 import { ReportSection, KnowledgeLink } from '../primitives';
 import { knowledgeForIssue } from '../../../knowledge/knowledge';
-import { ReportIssue } from '../../../../types/audit';
+import { ReportIssue } from '../reportModel';
 
 interface PriorityPlanSectionProps {
   data: ReportModel;

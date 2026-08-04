@@ -1,4 +1,17 @@
-import { AuditResult, ReportIssue, AuditScreenshot, TechItem } from '../../../types/audit';
+import { AuditResult, AuditScreenshot, TechItem } from '../../../types/audit';
+
+export interface ReportIssue {
+  id?: string;
+  category?: string;
+  severity: string;
+  message: string;
+  description?: string;
+  type?: string;
+  title?: string;
+  ruleId?: string;
+  evidence?: any;
+  recommendation?: string;
+}
 
 export const SeverityRanking: Record<string, number> = {
   critical: 0,
@@ -57,14 +70,14 @@ export function buildReportModel(
   const aScore = result.accScore || 0;
   const secScore = result.securityScore || 0;
 
-  let overallScore = result.overallScore;
+  let overallScore = (result as any).overallScore;
   if (overallScore === undefined || overallScore === null) {
     overallScore = Math.round((pScore + sScore + aScore + secScore) / 4);
   }
 
   // Best practices (avg of html and css if available, else 0)
-  const hScore = result.htmlScore || 0;
-  const cScore = result.cssScore || 0;
+  const hScore = (result as any).htmlScore || 0;
+  const cScore = (result as any).cssScore || 0;
   const bestPracticesScore = (hScore > 0 || cScore > 0) ? Math.round((hScore + cScore) / 2) : 0;
 
   // AI Summary parsing
@@ -125,7 +138,7 @@ export function buildReportModel(
   const cwv = result.perfDetails?.coreWebVitals;
   const lcpValue = cwv?.lcp !== undefined ? cwv.lcp : null;
   const clsValue = cwv?.cls !== undefined ? cwv.cls : null;
-  const inpValue = cwv?.inp !== undefined ? cwv.inp : null;
+  const inpValue = (cwv as any)?.inp !== undefined ? (cwv as any).inp : null;
 
   const formatMs = (val: number | null) => val !== null ? `${(val / 1000).toFixed(2)}s` : '-';
   const formatNum = (val: number | null) => val !== null ? val.toFixed(3) : '-';
@@ -174,11 +187,11 @@ export function buildReportModel(
       });
   };
 
-  collectIssues(result.performanceIssues, 'performance');
-  collectIssues(result.securityIssues, 'security');
-  collectIssues(result.accessibility, 'accessibility');
-  collectIssues(result.htmlIssues, 'html');
-  collectIssues(result.cssIssues, 'css');
+  collectIssues((result as any).performanceIssues, 'performance');
+  collectIssues((result as any).securityIssues, 'security');
+  collectIssues((result as any).accessibility, 'accessibility');
+  collectIssues((result as any).htmlIssues, 'html');
+  collectIssues((result as any).cssIssues, 'css');
 
   // Sort by severity explicitly pinned to SeverityRanking
   issues.sort((a, b) => {
@@ -200,8 +213,8 @@ export function buildReportModel(
 
   // Tools
   const tools: TechItem[] = [];
-  if (result.technologies && Array.isArray(result.technologies)) {
-      tools.push(...result.technologies);
+  if ((result as any).technologies && Array.isArray((result as any).technologies)) {
+      tools.push(...(result as any).technologies);
   }
 
   // Resource Breakdown

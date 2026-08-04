@@ -67,7 +67,7 @@ export function IssueListSection({ data }: IssueListSectionProps) {
                     {formatSeverity(issue.severity)}
                   </td>
                   <td className="px-4 py-3 align-top text-gray-700 font-medium">
-                    {getCategoryLabel(issue.category)}
+                    {getCategoryLabel(issue.category || '')}
                   </td>
                   <td className="px-4 py-3 align-top text-gray-600">
                     <p className="line-clamp-3" title={issue.description}>{issue.description}</p>
