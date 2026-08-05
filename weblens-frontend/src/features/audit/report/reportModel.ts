@@ -192,6 +192,7 @@ export function buildReportModel(
   collectIssues((result as any).accessibility, 'accessibility');
   collectIssues((result as any).htmlIssues, 'html');
   collectIssues((result as any).cssIssues, 'css');
+  collectIssues((result as any).seoIssues, 'seo');
 
   // Sort by severity explicitly pinned to SeverityRanking
   issues.sort((a, b) => {
