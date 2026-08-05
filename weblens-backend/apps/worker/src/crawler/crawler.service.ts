@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { chromium, Browser, Page } from 'playwright';
+import type { Request } from 'playwright';
 import { URL } from 'url';
 // We need to dynamically import get-port since it's an ESM package
 // const getPort = require('get-port');
@@ -100,12 +101,12 @@ export class CrawlerService {
     try {
       const page: Page = await browser.newPage();
 
-      const networkRequests: NetworkRequest[] = [];
+      const networkRequestsMap = new Map<Request, NetworkRequest>();
       const consoleMessages: ConsoleMessageEntry[] = [];
 
       // Collect network requests
       page.on('request', (request) => {
-        networkRequests.push({
+        networkRequestsMap.set(request, {
           url: request.url(),
           method: request.method(),
           resourceType: request.resourceType(),
@@ -117,7 +118,7 @@ export class CrawlerService {
       });
 
       page.on('response', async (response) => {
-        const req = networkRequests.find((r) => r.url === response.url());
+        const req = networkRequestsMap.get(response.request());
         if (req) {
           req.status = response.status();
           req.statusText = response.statusText();
@@ -223,6 +224,8 @@ export class CrawlerService {
 
       // Fetch robots.txt relative to target URL
       const robotsInfo = await this.fetchRobotsTxt(url);
+
+      const networkRequests = Array.from(networkRequestsMap.values());
 
       const crawlResult = {
         htmlContent: content,
