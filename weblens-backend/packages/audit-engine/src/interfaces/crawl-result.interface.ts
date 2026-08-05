@@ -1,3 +1,5 @@
+import type { Page, Browser } from 'playwright';
+
 export interface LighthouseData {
   performance: number;
   accessibility: number;
@@ -488,4 +490,9 @@ export interface CrawlResult {
     properties: Record<string, any>;
     selector: string;
   }>;
+}
+
+export interface CrawlSession extends CrawlResult {
+  page: Page;
+  browser: Browser;
 }
