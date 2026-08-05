@@ -258,13 +258,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(WCAG_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'wcag',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'wcag',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -275,13 +278,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(SECURITY_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'security',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'security',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -292,13 +298,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(PERF_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'performance',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'performance',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -309,13 +318,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(SEO_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'seo',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'seo',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -523,13 +535,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(WCAG_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'wcag',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'wcag',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -540,13 +555,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(SECURITY_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'security',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'security',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -557,13 +575,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(PERF_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'performance',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'performance',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -574,13 +595,16 @@ export class AuditProcessor extends WorkerHost {
           const match = Object.entries(SEO_REFERENCES).find(
             ([key]) => issue.id && issue.id.includes(key),
           );
-          if (match && !addedRefs.has(match[1].url)) {
-            referenceLinks.push({
-              title: match[1].title,
-              url: match[1].url,
-              category: 'seo',
-            });
-            addedRefs.add(match[1].url);
+          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+            const m = (match as any)[1];
+            if (m.url && !addedRefs.has(m.url as string)) {
+              referenceLinks.push({
+                title: m.title as string,
+                url: m.url as string,
+                category: 'seo',
+              });
+              addedRefs.add(m.url as string);
+            }
           }
         }
       }
@@ -639,9 +663,9 @@ export class AuditProcessor extends WorkerHost {
       this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
 
       // Close browser after all analysis is done
-      if ((crawlData as any).browser) {
+      if ((crawlData as {browser?: {close: () => Promise<void>}}).browser) {
         try {
-          await (crawlData as any).browser.close();
+          await (crawlData as {browser: {close: () => Promise<void>}}).browser.close();
         } catch (e) {}
       }
 
