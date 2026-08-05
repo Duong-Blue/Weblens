@@ -11,6 +11,10 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     if (req.url.includes('example.com')) {
       res.end('<div id="search">fake results</div>');
+    } else if (req.url.includes('fallback.com')) {
+      // Fallback case: no #search/#rso container, only a link to the queried
+      // domain. hasSerpResults must still treat this as a valid SERP.
+      res.end('<a href="https://fallback.com">fallback result</a>');
     } else {
       res.end('<div>no results</div>');
     }
@@ -58,6 +62,10 @@ server.listen(0, async () => {
     const res2 = await crawler.testCapture(browser, 'https://notfound.com', serpBaseUrl);
     console.log('res2 length:', res2.length);
     if (res2.length !== 0) throw new Error('Expected 0 screenshots for no results');
+    
+    const res3 = await crawler.testCapture(browser, 'https://fallback.com', serpBaseUrl);
+    console.log('res3 length:', res3.length);
+    if (res3.length < 1) throw new Error('Expected at least 1 screenshot for fallback case');
     
     console.log('SMOKE TEST PASSED');
   } catch (e) {

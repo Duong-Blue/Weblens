@@ -2,6 +2,7 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { CrawlerService } from './crawler/crawler.service';
+import { FallbackLighthouseEngine } from '@weblens/audit-engine';
 import {
   AuditLogicService,
   ScoringService,
@@ -109,6 +110,9 @@ export class AuditProcessor extends WorkerHost {
       });
 
     const crawlData = await this.crawlerService.crawl(url);
+    if (!crawlData.lighthouseData) {
+      crawlData.lighthouseData = await FallbackLighthouseEngine.compute(crawlData);
+    }
     try {
       this.logger.debug(
         `[Job ${job.id}] Step 1 Complete: Crawling finished successfully`,
@@ -137,7 +141,7 @@ export class AuditProcessor extends WorkerHost {
         crawlData: crawlData as any,
         url: url,
         network: (crawlData as any).network,
-        lighthouse: (crawlData as any).lighthouse,
+        lighthouseData: (crawlData as any).lighthouseData,
         headers: (crawlData as any).headers,
       };
       const seoAnalysis = this.seoEngineService.analyze(seoContext);
@@ -411,7 +415,7 @@ export class AuditProcessor extends WorkerHost {
         crawlData: crawlData as any,
         url: url,
         network: (crawlData as any).network,
-        lighthouse: (crawlData as any).lighthouse,
+        lighthouseData: (crawlData as any).lighthouseData,
         headers: (crawlData as any).headers,
       };
       const seoAnalysis = this.seoEngineService.analyze(seoContext);

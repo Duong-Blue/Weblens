@@ -1,7 +1,10 @@
 import type { Page, Browser } from 'playwright';
 
+export type LighthouseSource = 'lighthouse' | 'fallback';
+
 export interface LighthouseData {
-  performance: number;
+  source: LighthouseSource;
+  performance: number | null;
   accessibility: number;
   bestPractices: number;
   seo: number;
@@ -461,7 +464,7 @@ export interface CrawlResult {
     reportTo?: string;
   };
 
-  lighthouseData?: LighthouseData;
+  lighthouseData?: LighthouseData | null;
   sitemapInfo: { found: boolean; urlCount?: number; urls?: string[] };
   robotsInfo: { found: boolean; disallowed?: string[]; sitemaps?: string[] };
   

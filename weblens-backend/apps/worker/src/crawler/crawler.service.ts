@@ -29,7 +29,7 @@ interface RobotsInfo {
 
 // Script injected before navigation to capture Core Web Vitals via PerformanceObserver.
 // Runs in-browser — uses plain JS (no TS-specific syntax) so addInitScript stringification is safe.
-const CWV_SCRIPT = `
+export const CWV_SCRIPT = `
 window.__cwv = { lcp: undefined, inp: undefined, cls: 0 };
 
 try {
@@ -41,8 +41,9 @@ try {
   }).observe({ type: 'largest-contentful-paint', buffered: true });
 } catch (e) {}
 
-try {
-  var inpEntries = [];
+  // Capture INP (Note: requires user interaction; remains undefined in automated crawls).
+  try {
+    var inpEntries = [];
   new PerformanceObserver(function(list) {
     var entries = list.getEntries();
     for (var i = 0; i < entries.length; i++) {
@@ -57,15 +58,42 @@ try {
 } catch (e) {}
 
 try {
-  var clsValue = 0;
+  // Cumulative Layout Shift via the web-vitals session-window algorithm
+  // (mirrors LayoutShiftManager._processEntry): a session continues while the
+  // gap to the previous entry is < 1s AND the span from the session's first
+  // entry is < 5s; otherwise a new session starts. The final session value is
+  // reported.
+  var clsSessionValue = 0;
+  var clsSessionEntries = [];
   new PerformanceObserver(function(list) {
     for (var i = 0; i < list.getEntries().length; i++) {
       var entry = list.getEntries()[i];
-      if (!entry.hadRecentInput) {
-        clsValue += entry.value;
+      if (entry.hadRecentInput) {
+        continue;
+      }
+      var firstSessionEntry = clsSessionEntries[0];
+      var lastSessionEntry =
+        clsSessionEntries[clsSessionEntries.length - 1];
+      if (
+        clsSessionValue &&
+        firstSessionEntry &&
+        lastSessionEntry &&
+        entry.startTime - lastSessionEntry.startTime < 1000 &&
+        entry.startTime - firstSessionEntry.startTime < 5000
+      ) {
+        clsSessionValue += entry.value;
+        clsSessionEntries.push({
+          startTime: entry.startTime,
+          value: entry.value,
+        });
+      } else {
+        clsSessionValue = entry.value;
+        clsSessionEntries = [
+          { startTime: entry.startTime, value: entry.value },
+        ];
       }
     }
-    window.__cwv.cls = clsValue;
+    window.__cwv.cls = clsSessionValue;
   }).observe({ type: 'layout-shift', buffered: true });
 } catch (e) {}
 `;
@@ -207,6 +235,11 @@ export class CrawlerService {
       };
       try {
         cwv = JSON.parse(cwvRaw);
+        if (cwv.inp === undefined) {
+          this.logger.log(
+            `INP not collected for ${url}: requires real user interaction; report shows 'no data'`,
+          );
+        }
       } catch {
         cwv = { lcp: undefined, inp: undefined, cls: 0 };
       }
@@ -264,26 +297,11 @@ export class CrawlerService {
         }
 
         const categories = lhResult.lhr.categories;
-        lighthouseData = {
-          performance: Math.round((categories.performance?.score ?? 0) * 100),
-          accessibility: Math.round(
-            (categories.accessibility?.score ?? 0) * 100,
-          ),
-          bestPractices: Math.round(
-            (categories['best-practices']?.score ?? 0) * 100,
-          ),
-          seo: Math.round((categories.seo?.score ?? 0) * 100),
-        };
+        lighthouseData = { source: 'lighthouse', performance: categories.performance?.score != null ? Math.round(categories.performance.score * 100) : null, accessibility: Math.round((categories.accessibility?.score ?? 0) * 100), bestPractices: Math.round((categories['best-practices']?.score ?? 0) * 100), seo: Math.round((categories.seo?.score ?? 0) * 100) };
         this.logger.log(`Lighthouse completed successfully for ${url}`);
       } catch (error) {
         this.logger.error(`Lighthouse failed for ${url}:`, error);
-        lighthouseData = this.computeLighthouseData({
-          performanceTiming: parsedTiming,
-          cwv,
-          networkRequests,
-          consoleMessages,
-          htmlContent: content,
-        });
+        lighthouseData = null;
         this.logger.log(
           `Used fallback simulated Lighthouse data for ${url} due to failure.`,
         );
@@ -300,7 +318,7 @@ export class CrawlerService {
     }
   }
 
-  private async scrollPageWithLazyLoad(page: Page) {
+  private scrollPageWithLazyLoad(page: Page) {
     const scrollDelay = 200;
     const scrollStep = 500;
     const lazyWait = 1000;
@@ -310,8 +328,14 @@ export class CrawlerService {
     const viewportHeight = await page.evaluate(() => window.innerHeight);
     let scrolledDistance = 0;
     let scrollCount = 0;
+    const startMs = Date.now();
+    let loopTripWarned = false;
 
-    while (scrolledDistance < pageHeight - viewportHeight) {
+    while (
+      scrolledDistance < pageHeight - viewportHeight &&
+      scrollCount < MAX_SCROLLS &&
+      Date.now() - startMs < MAX_SCROLL_TIME_MS
+    ) {
       await page.evaluate(
         (y: number) => window.scrollTo(0, y),
         scrolledDistance + scrollStep,
@@ -328,6 +352,13 @@ export class CrawlerService {
       } else {
         await page.waitForTimeout(scrollDelay);
       }
+    }
+
+    if (!loopTripWarned && scrolledDistance < pageHeight - viewportHeight) {
+      loopTripWarned = true;
+      this.logger.warn(
+        `Infinite scroll suspected: reached bound at scroll ${scrollCount} for this page`,
+      );
     }
 
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -376,30 +407,36 @@ export class CrawlerService {
           ctx = await browser.newContext(contextOptions);
           const pg = await ctx.newPage();
 
+          // Pre-seed Google CONSENT cookie to reduce consent popups.
+          await ctx
+            .addCookies([
+              {
+                name: 'CONSENT',
+                value: 'YES+',
+                domain: '.google.com',
+                path: '/',
+              },
+            ])
+            .catch(() => {});
+
           const searchUrl = `${serpBaseUrl}/search?q=${encodeURIComponent(domain)}`;
           await pg.goto(searchUrl, {
             waitUntil: 'domcontentloaded',
             timeout: 30000,
           });
 
-          const consentLabels = [
-            'Accept all',
-            'I agree',
-            'Tôi đồng ý',
-            'Chấp nhận tất cả',
-            'Đồng ý',
-          ];
-          for (const label of consentLabels) {
-            const btn = pg.getByRole('button', { name: label }).first();
-            if ((await btn.count()) > 0) {
-              await btn.click({ timeout: 3000 }).catch(() => {});
-              break;
-            }
+          // Broad consent-button matcher across regions/languages.
+          const consentRe =
+            /accept all|agree to all|i agree|tôi đồng ý|tôi chấp nhận|chấp nhận tất cả|đồng ý|alle akzeptieren|accepter tout|accepter/i;
+          const consentButton = pg
+            .getByRole('button', { name: consentRe })
+            .first();
+          if ((await consentButton.count()) > 0) {
+            await consentButton.click({ timeout: 3000 }).catch(() => {});
           }
           await pg.waitForTimeout(2500);
 
-          const hasResults = await pg.locator('#search, #rso').first().count();
-          if (hasResults === 0) {
+          if (!(await this.hasSerpResults(pg, domain))) {
             this.logger.warn(
               `No SERP results found for ${domain} on ${device}`,
             );
@@ -438,142 +475,23 @@ export class CrawlerService {
   }
 
   /**
-   * Derives simulated Lighthouse-like scores from available crawl metrics.
-   * Uses Navigation Timing API, Core Web Vitals, network request analysis,
-   * console message inspection, and basic HTML parsing.
-   *
-   * TODO: Replace with real Lighthouse run when infrastructure allows.
+   * Detects whether the loaded page actually shows SERP results.
+   * Layer 1 is the Google results container; layers 2-3 are fallbacks that
+   * match result links pointing at the queried domain or via Google's /url
+   * redirect. Skips only when all three layers fail.
    */
-  private computeLighthouseData(data: {
-    performanceTiming: any;
-    cwv: {
-      lcp?: number;
-      inp?: number;
-      cls?: number;
-      fcp?: number;
-      ttfb?: number;
-    };
-    networkRequests: NetworkRequest[];
-    consoleMessages: ConsoleMessageEntry[];
-    htmlContent: string;
-  }): LighthouseData {
-    const { consoleMessages, htmlContent, networkRequests } = data;
-
-    // --- Accessibility Score ---
-    let accScore = 100;
-
-    // Viewport meta tag
-    const hasViewport =
-      /<meta\s[^>]*name\s*=\s*["']viewport["'][^>]*\/?>/i.test(htmlContent);
-    if (!hasViewport) accScore -= 20;
-
-    // Images missing alt attribute
-    const imgRegex = /<img[^>]*>/gi;
-    let totalImgs = 0;
-    let missingAltImgs = 0;
-    let imgMatch: RegExpExecArray | null;
-    while ((imgMatch = imgRegex.exec(htmlContent)) !== null) {
-      totalImgs++;
-      if (!/alt\s*=/i.test(imgMatch[0])) missingAltImgs++;
+  private async hasSerpResults(pg: Page, domain: string): Promise<boolean> {
+    const layers = [
+      pg.locator('#search, #rso').first(),
+      pg.locator(`a[href*="${domain}"]`).first(),
+      pg.locator('a[href*="/url?q="]').first(),
+    ];
+    for (const layer of layers) {
+      if ((await layer.count()) > 0) {
+        return true;
+      }
     }
-    if (totalImgs > 0) {
-      const missingAltRatio = missingAltImgs / totalImgs;
-      accScore -= Math.round(missingAltRatio * 30);
-    }
-
-    // Check for heading structure
-    const hasH1 = /<h1[\s>]/i.test(htmlContent);
-    const hasH2 = /<h2[\s>]/i.test(htmlContent);
-    if (!hasH1 && !hasH2) accScore -= 15;
-
-    // Console errors (JS errors affect user experience/interaction)
-    const errorCount = consoleMessages.filter((m) => m.type === 'error').length;
-    accScore -= Math.min(errorCount * 5, 20);
-
-    // Language attribute on <html>
-    const hasLangAttr = /<html[^>]*\slang\s*=/i.test(htmlContent);
-    if (!hasLangAttr) accScore -= 10;
-
-    accScore = Math.max(0, Math.min(100, Math.round(accScore)));
-
-    // --- Best Practices Score ---
-    let bpScore = 100;
-
-    // Console errors/warnings
-    bpScore -= Math.min(errorCount * 5, 30);
-    const warnCount = consoleMessages.filter(
-      (m) => m.type === 'warning',
-    ).length;
-    bpScore -= Math.min(warnCount * 2, 10);
-
-    // Doctype presence
-    const hasDoctype = /<!doctype\s+html/i.test(htmlContent);
-    if (!hasDoctype) bpScore -= 10;
-
-    // Viewport meta (reuse from above)
-    if (!hasViewport) bpScore -= 10;
-
-    // Check for deprecated HTML features like <center>, <font>, <marquee>
-    const hasDeprecatedTags = /<\/(center|font|marquee)>/i.test(htmlContent);
-    if (hasDeprecatedTags) bpScore -= 10;
-
-    // Console errors suggesting JS exceptions
-    const jsErrorTexts = consoleMessages
-      .filter((m) => m.type === 'error')
-      .map((m) => m.text)
-      .filter(Boolean);
-    if (jsErrorTexts.length > 0)
-      bpScore -= Math.min(jsErrorTexts.length * 3, 15);
-
-    bpScore = Math.max(0, Math.min(100, Math.round(bpScore)));
-
-    // --- SEO Score ---
-    let seoScore = 0;
-
-    // Title tag
-    const titleMatch = /<title[^>]*>([^<]*)<\/title>/i.exec(htmlContent);
-    const hasTitle = !!titleMatch;
-    if (hasTitle) {
-      seoScore += 20;
-      const titleText = titleMatch[1].trim();
-      if (titleText.length >= 10 && titleText.length <= 70) seoScore += 15;
-    }
-
-    // Meta description
-    const metaDescRegex =
-      /<meta\s[^>]*name\s*=\s*["']description["'][^>]*content\s*=\s*["']([^"']*)["'][^>]*\/?>/i;
-    const altMetaDescRegex =
-      /<meta\s[^>]*content\s*=\s*["']([^"']*)["'][^>]*name\s*=\s*["']description["'][^>]*\/?>/i;
-    const hasMetaDesc =
-      metaDescRegex.test(htmlContent) || altMetaDescRegex.test(htmlContent);
-    if (hasMetaDesc) seoScore += 20;
-
-    // H1 presence
-    if (hasH1) seoScore += 15;
-
-    // Viewport meta (important for mobile SEO)
-    if (hasViewport) seoScore += 15;
-
-    // No broken links (no failed responses among navigation-like requests)
-    const brokenLinks = networkRequests.filter(
-      (r) =>
-        r.status >= 400 &&
-        r.status < 600 &&
-        (r.resourceType === 'document' ||
-          r.resourceType === 'xhr' ||
-          r.resourceType === 'fetch'),
-    ).length;
-    if (brokenLinks === 0) seoScore += 15;
-    else seoScore -= Math.min(brokenLinks * 5, 15);
-
-    seoScore = Math.max(0, Math.min(100, Math.round(seoScore)));
-
-    return {
-      performance: 0,
-      accessibility: accScore,
-      bestPractices: bpScore,
-      seo: seoScore,
-    };
+    return false;
   }
 
   private async fetchSitemap(targetUrl: string): Promise<SitemapInfo> {

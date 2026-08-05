@@ -9,7 +9,7 @@ export interface EngineResult {
 export interface EngineContext {
   crawlData: CrawlResult;
   url: string;
-  lighthouse?: LighthouseData | null;
+  lighthouseData?: LighthouseData | null;
   network?: NetworkRequest[];
   headers?: Record<string, string>;
   screenshots?: ScreenshotItem[];
