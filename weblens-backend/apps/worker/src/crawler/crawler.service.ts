@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as dns from 'dns';
 import {
-  CrawlResult,
+  CrawlSession,
   ConsoleMessageEntry,
   NetworkRequest,
   LighthouseData,
@@ -84,7 +84,7 @@ export class CrawlerService {
     }
   }
 
-  async crawl(url: string): Promise<CrawlResult> {
+  async crawl(url: string): Promise<CrawlSession> {
     await this.validateDomain(url);
     // Import get-port dynamically at runtime since it's an ESM package
     const { default: getPort } = await (eval(
