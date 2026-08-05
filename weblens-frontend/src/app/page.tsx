@@ -54,8 +54,10 @@ export default function Home() {
           setLiveStatus('summarized');
         }
 
-        if (step === 'completed' && data && !auditData) {
-          setLiveData(data);
+        if (step === 'completed' && !auditData) {
+          if (data) {
+            setLiveData(data);
+          }
           setLiveStatus('completed');
           triggerFetch(activeAuditId);
         }
@@ -75,8 +77,8 @@ export default function Home() {
     };
   }, [socket, activeAuditId, triggerFetch, auditData]);
 
-  const status = liveStatus || (auditData as { data?: { audit?: { status?: string } } })?.data?.audit?.status;
-  const result = liveData || (auditData as { data?: { result?: AuditResult } })?.data?.result;
+  const status = liveStatus || (auditData as any)?.data?.audit?.status || (auditData as any)?.audit?.status;
+  const result = liveData || (auditData as any)?.data?.result || (auditData as any)?.result;
   const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling';
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -104,12 +106,21 @@ export default function Home() {
 
     createAudit({ url: submitUrl, anonymous: true })
       .unwrap()
-      .then((res: { audit?: { id?: string }, data?: { audit?: { id?: string } } }) => {
-        const auditId = res?.audit?.id || res?.data?.audit?.id;
-        if (auditId) {
-          setActiveAuditId(auditId);
+      .then((res: any) => {
+        console.log('Create audit response:', res);
+        
+        const finalAuditId = res?.audit?.id || res?.id || res?.data?.audit?.id;
+        
+        if (finalAuditId) {
+          setActiveAuditId(finalAuditId);
           setLiveStatus('pending');
+        } else {
+          setUrlError("Không thể lấy ID báo cáo. Vui lòng thử lại.");
         }
+      })
+      .catch((err) => {
+        console.error('Error creating audit:', err);
+        setUrlError("Có lỗi xảy ra khi tạo báo cáo. Vui lòng thử lại.");
       });
   };
 
@@ -165,7 +176,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-zinc-900 flex items-center gap-3">
                 Báo cáo cho
                 <span className="px-4 py-1.5 bg-zinc-900/5 text-zinc-800 rounded-lg font-semibold text-lg ml-1 border border-zinc-900/10 shadow-sm">
-                  {(auditData as { data?: { audit?: { url?: string } } })?.data?.audit?.url || url}
+                  {(auditData as any)?.data?.audit?.url || (auditData as any)?.audit?.url || url}
                 </span>
               </h2>
               <div className="flex items-center gap-3">
@@ -229,8 +240,8 @@ export default function Home() {
                 </div>
                 <span className="font-semibold text-xl text-zinc-900">Đánh giá thất bại</span>
                 <span className="text-zinc-500 max-w-md">
-                  {isCreateError ? (createError as Error & { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể tạo yêu cầu đánh giá." :
-                    (liveData?.error?.includes("ERR_NAME_NOT_RESOLVED") || (auditData as { data?: { result?: { error?: string } } })?.data?.result?.error?.includes("ERR_NAME_NOT_RESOLVED")
+                  {isCreateError ? (createError as any)?.response?.data?.message || (createError as any)?.data?.message || "Không thể tạo yêu cầu đánh giá." :
+                    (liveData?.error?.includes("ERR_NAME_NOT_RESOLVED") || (auditData as any)?.data?.result?.error?.includes("ERR_NAME_NOT_RESOLVED") || (auditData as any)?.result?.error?.includes("ERR_NAME_NOT_RESOLVED")
                       ? "Không thể phân giải tên miền. Vui lòng kiểm tra lại URL và thử lại."
                       : "Vui lòng kiểm tra lại URL và thử lại.")}
                 </span>

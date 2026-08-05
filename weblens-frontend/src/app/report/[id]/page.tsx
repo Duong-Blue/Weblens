@@ -31,7 +31,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     );
   }
 
-  if (isError || !data?.data?.result) {
+  if (isError || !data?.result) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 px-4">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 max-w-md w-full text-center">
@@ -52,7 +52,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     );
   }
 
-  const { audit, result } = data?.data || {};
+  const audit = data?.audit || {};
+  const result = data?.result;
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-20">
