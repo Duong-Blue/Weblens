@@ -13,6 +13,9 @@ import {
   SecurityMapperService,
   HtmlCssMapperService,
   PerfEngineService,
+  SeoEngineService,
+  SEO_REFERENCES,
+  EngineContext
 } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
@@ -80,6 +83,7 @@ export class AuditProcessor extends WorkerHost {
     private readonly redisService: RedisService,
     private readonly mozObservatoryService: MozObservatoryService,
     private readonly perfEngineService: PerfEngineService,
+    private readonly seoEngineService: SeoEngineService,
   ) {
     super();
   }
@@ -129,6 +133,18 @@ export class AuditProcessor extends WorkerHost {
         ...((comprehensiveAuditData as any).performanceIssues || []),
         ...perfAnalysis.issues,
       ];
+
+      this.logger.debug(`[Job ${job.id}] Step 2.4: Running SEO analysis...`);
+      const seoContext: EngineContext = {
+        crawlData: crawlData as any,
+        url: url,
+        network: (crawlData as any).network,
+        lighthouse: (crawlData as any).lighthouse,
+        headers: (crawlData as any).headers,
+      };
+      const seoAnalysis = this.seoEngineService.analyze(seoContext);
+      (comprehensiveAuditData as any).seoScore = seoAnalysis.score;
+      (comprehensiveAuditData as any).seoIssues = seoAnalysis.issues;
 
       this.logger.debug(
         `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
@@ -286,6 +302,23 @@ export class AuditProcessor extends WorkerHost {
               title: match[1].title,
               url: match[1].url,
               category: 'performance',
+            });
+            addedRefs.add(match[1].url);
+          }
+        }
+      }
+
+      // SEO Links
+      if ((comprehensiveAuditData as any).seoIssues) {
+        for (const issue of (comprehensiveAuditData as any).seoIssues) {
+          const match = Object.entries(SEO_REFERENCES).find(
+            ([key]) => issue.id && issue.id.includes(key),
+          );
+          if (match && !addedRefs.has(match[1].url)) {
+            referenceLinks.push({
+              title: match[1].title,
+              url: match[1].url,
+              category: 'seo',
             });
             addedRefs.add(match[1].url);
           }
