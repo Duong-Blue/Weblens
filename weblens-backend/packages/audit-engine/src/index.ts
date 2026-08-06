@@ -9,5 +9,6 @@ export * from './engines/seo';
 export * from './engines/accessibility';
 export * from './engines/security';
 export * from './engines/html-css';
+export * from './engines/lighthouse';
 export * from './perf/perf-engine.service';
 export * from './perf/perf-config';

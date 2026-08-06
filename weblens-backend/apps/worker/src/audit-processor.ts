@@ -16,7 +16,7 @@ import {
   PerfEngineService,
   SeoEngineService,
   SEO_REFERENCES,
-  EngineContext
+  EngineContext,
 } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
@@ -109,576 +109,310 @@ export class AuditProcessor extends WorkerHost {
         data: null,
       });
 
-    const crawlData = await this.crawlerService.crawl(url);
-    if (!crawlData.lighthouseData) {
-      crawlData.lighthouseData = await FallbackLighthouseEngine.compute(crawlData);
-    }
-    try {
-      this.logger.debug(
-        `[Job ${job.id}] Step 1 Complete: Crawling finished successfully`,
-      );
-      await job.updateProgress({
-        auditId,
-        step: 'crawled',
-        progress: 40,
-        data: null,
-      });
-
-      this.logger.debug(`[Job ${job.id}] Step 2: Starting analysis...`);
-
-      const comprehensiveAuditData =
-        await this.auditLogicService.performComprehensiveAudit(crawlData, url);
-
-      const perfAnalysis = this.perfEngineService.analyze(crawlData);
-      (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
-      (comprehensiveAuditData as any).performanceIssues = [
-        ...((comprehensiveAuditData as any).performanceIssues || []),
-        ...perfAnalysis.issues,
-      ];
-
-      this.logger.debug(`[Job ${job.id}] Step 2.4: Running SEO analysis...`);
-      const seoContext: EngineContext = {
-        crawlData: crawlData as any,
-        url: url,
-        network: (crawlData as any).network,
-        lighthouseData: (crawlData as any).lighthouseData,
-        headers: (crawlData as any).headers,
-      };
-      const seoAnalysis = this.seoEngineService.analyze(seoContext);
-      (comprehensiveAuditData as any).seoScore = seoAnalysis.score;
-      (comprehensiveAuditData as any).seoIssues = seoAnalysis.issues;
-
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
-      );
-      const accessibilityResults = await this.axeRunnerService.runAxeOnPage(
-        crawlData.page,
-      );
-      const mappedAccessibilityIssues =
-        await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
-      (comprehensiveAuditData as any).accessibility = mappedAccessibilityIssues;
-
-      this.logger.debug(`[Job ${job.id}] Step 2.6: Running security audit...`);
-      const headers = (crawlData as any).headers || {};
-      const tlsInfo = (crawlData as any).tlsInfo || null;
-
-      const headerResults =
-        this.headerCheckerService.checkSecurityHeaders(headers);
-      const tlsResults = this.tlsValidatorService.checkTLS(tlsInfo);
-
-      const allSecurityIssues = [...headerResults, ...tlsResults];
-      const securityScoreResult =
-        this.securityMapperService.calculateSecurityScore(allSecurityIssues);
-
-      (comprehensiveAuditData as any).securityScore = securityScoreResult.score;
-      (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
-
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`,
-      );
+      const crawlData = await this.crawlerService.crawl(url);
+      if (!crawlData.lighthouseData) {
+        crawlData.lighthouseData =
+          await FallbackLighthouseEngine.compute(crawlData);
+      }
       try {
-        const hostname = new URL(url).hostname;
-        const mozResult = await this.mozObservatoryService.analyze(hostname);
-        if (mozResult) {
-          (comprehensiveAuditData as any).securityMozillaGrade =
-            mozResult.grade;
-          (comprehensiveAuditData as any).securityMozillaScore =
-            mozResult.score;
-          (comprehensiveAuditData as any).securityMozillaTests = {
-            passed: mozResult.testsPassed || mozResult.tests_failed,
-            failed: mozResult.testsFailed || mozResult.tests_failed,
-          };
-        } else {
-          (comprehensiveAuditData as any).securityMozillaGrade =
-            securityScoreResult.mozillaResult.grade;
-        }
-      } catch (e) {
-        this.logger.warn(
-          `Mozilla Observatory failed for ${url}, using fallback grade`,
+        this.logger.debug(
+          `[Job ${job.id}] Step 1 Complete: Crawling finished successfully`,
         );
-        (comprehensiveAuditData as any).securityMozillaGrade =
-          securityScoreResult.mozillaResult.grade;
-      }
+        await job.updateProgress({
+          auditId,
+          step: 'crawled',
+          progress: 40,
+          data: null,
+        });
 
-      this.logger.debug(`[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`);
-      const htmlCssResult =
-        this.htmlCssMapperService.processHtmlCssAudit(crawlData);
+        this.logger.debug(`[Job ${job.id}] Step 2: Starting analysis...`);
 
-      (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
-      (comprehensiveAuditData as any).htmlIssues = htmlCssResult.issues.filter(
-        (i) => i.id.startsWith('HTML-'),
-      );
-      (comprehensiveAuditData as any).cssScore = htmlCssResult.cssScore;
-      (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(
-        (i) => i.id.startsWith('CSS-'),
-      );
+        const comprehensiveAuditData =
+          await this.auditLogicService.performComprehensiveAudit(
+            crawlData,
+            url,
+          );
 
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.7.5: Detecting technology stack...`,
-      );
-      const technologies = this.techDetectorService.detect(
-        (crawlData as any).htmlContent,
-        (crawlData as any).headers || {},
-      );
-      (comprehensiveAuditData as any).technologies = technologies;
+        const perfAnalysis = this.perfEngineService.analyze(crawlData);
+        (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
+        (comprehensiveAuditData as any).performanceIssues = [
+          ...((comprehensiveAuditData as any).performanceIssues || []),
+          ...perfAnalysis.issues,
+        ];
 
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.8: Calculating Final Scores...`,
-      );
+        this.logger.debug(`[Job ${job.id}] Step 2.4: Running SEO analysis...`);
+        const seoContext: EngineContext = {
+          crawlData: crawlData as any,
+          url: url,
+          network: (crawlData as any).network,
+          lighthouseData: (crawlData as any).lighthouseData,
+          headers: (crawlData as any).headers,
+        };
+        const seoAnalysis = this.seoEngineService.analyze(seoContext);
+        (comprehensiveAuditData as any).seoScore = seoAnalysis.score;
+        (comprehensiveAuditData as any).seoIssues = seoAnalysis.issues;
 
-      const engineScores: EngineScore[] = [];
-
-      if ((comprehensiveAuditData as any).seoIssues) {
-        engineScores.push(
-          ScoringService.calculateEngineScore(
-            'seo',
-            (comprehensiveAuditData as any).seoIssues,
-          ),
+        this.logger.debug(
+          `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
         );
-      }
-      if ((comprehensiveAuditData as any).performanceIssues) {
-        engineScores.push(
-          ScoringService.calculateEngineScore(
-            'performance',
-            (comprehensiveAuditData as any).performanceIssues,
-          ),
+        const accessibilityResults = await this.axeRunnerService.runAxeOnPage(
+          crawlData.page,
         );
-      }
+        const mappedAccessibilityIssues =
+          await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
+        (comprehensiveAuditData as any).accessibility =
+          mappedAccessibilityIssues;
 
-      const overallResult = ScoringService.calculateOverallScore(engineScores);
-      (comprehensiveAuditData as any).overallScore = overallResult.overallScore;
-      (comprehensiveAuditData as any).scoreLabel = overallResult.label;
-      (comprehensiveAuditData as any).scoreColor = overallResult.color;
-      (comprehensiveAuditData as any).scoreBreakdown = overallResult.breakdown;
-
-      const screenshots = flattenScreenshots((crawlData as any).screenshots);
-      const referenceLinks: ReferenceLink[] = [];
-
-      const addedRefs = new Set<string>();
-
-      // WCAG Links
-      if ((comprehensiveAuditData as any).accessibility) {
-        for (const issue of (comprehensiveAuditData as any).accessibility) {
-          const match = Object.entries(WCAG_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'wcag',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      // Security Links
-      if ((comprehensiveAuditData as any).securityIssues) {
-        for (const issue of (comprehensiveAuditData as any).securityIssues) {
-          const match = Object.entries(SECURITY_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'security',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      // Perf Links
-      if ((comprehensiveAuditData as any).performanceIssues) {
-        for (const issue of (comprehensiveAuditData as any).performanceIssues) {
-          const match = Object.entries(PERF_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'performance',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      // SEO Links
-      if ((comprehensiveAuditData as any).seoIssues) {
-        for (const issue of (comprehensiveAuditData as any).seoIssues) {
-          const match = Object.entries(SEO_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'seo',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      this.logger.debug(
-        `[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`,
-      );
-      await job.updateProgress({
-        auditId,
-        step: 'analyzed',
-        progress: 70,
-        data: comprehensiveAuditData,
-      });
-
-      this.logger.debug(`[Job ${job.id}] Step 3: Generating AI Summary...`);
-      const aiSummary = await this.aiService.generateSummary({
-        url,
-        ...comprehensiveAuditData,
-      });
-      this.logger.debug(
-        `[Job ${job.id}] Step 3 Complete: AI Summary generated`,
-      );
-      await job.updateProgress({
-        auditId,
-        step: 'summarized',
-        progress: 90,
-        data: { aiSummary: JSON.stringify(aiSummary) },
-      });
-
-      const rawHeaders = (crawlData as any).headers || {};
-      const serverHeader =
-        (crawlData as any).mainHeaders?.server ||
-        rawHeaders['server'] ||
-        'Unknown';
-      const cdn =
-        detectCdn((crawlData as any).mainHeaders) || detectCdn(rawHeaders);
-      const serverInfo = {
-        server: serverHeader,
-        cdn: cdn,
-      };
-
-      const resultData: AuditResult = {
-        id: auditId,
-        auditId: auditId,
-        url: url,
-        serverInfo: serverInfo,
-        ...(comprehensiveAuditData as any),
-        screenshots,
-        referenceLinks,
-        aiSummary: JSON.stringify(aiSummary),
-        aiCategoryAnalysis: aiSummary.categoryAnalysis || {},
-        summary:
-          typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
-      };
-
-      this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
-      await this.redisService.setAuditResult(auditId, resultData);
-
-      this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
-      await job.updateProgress({ auditId, step: 'completed', progress: 100 });
-      return { success: true, result: resultData };
-    } finally {
-      await crawlData.browser.close().catch(() => {});
-    }
-      if (!anonymous) {
-        // Status updates will be sent via WebSocket events and/or stored in Redis in future steps
-      }
-
-      const comprehensiveAuditData =
-        await this.auditLogicService.performComprehensiveAudit(crawlData, url);
-
-      const perfAnalysis = this.perfEngineService.analyze(crawlData);
-      (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
-      (comprehensiveAuditData as any).performanceIssues = [
-        ...((comprehensiveAuditData as any).performanceIssues || []),
-        ...perfAnalysis.issues,
-      ];
-
-      this.logger.debug(`[Job ${job.id}] Step 2.4: Running SEO analysis...`);
-      const seoContext: EngineContext = {
-        crawlData: crawlData as any,
-        url: url,
-        network: (crawlData as any).network,
-        lighthouseData: (crawlData as any).lighthouseData,
-        headers: (crawlData as any).headers,
-      };
-      const seoAnalysis = this.seoEngineService.analyze(seoContext);
-      (comprehensiveAuditData as any).seoScore = seoAnalysis.score;
-      (comprehensiveAuditData as any).seoIssues = seoAnalysis.issues;
-
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
-      );
-      const accessibilityResults = await this.axeRunnerService.runAxeOnPage(
-        crawlData.page,
-      );
-      const mappedAccessibilityIssues =
-        await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
-      (comprehensiveAuditData as any).accessibility = mappedAccessibilityIssues;
-
-      this.logger.debug(`[Job ${job.id}] Step 2.6: Running security audit...`);
-      const headers = (crawlData as any).headers || {};
-      const tlsInfo = (crawlData as any).tlsInfo || null;
-
-      const headerResults =
-        this.headerCheckerService.checkSecurityHeaders(headers);
-      const tlsResults = this.tlsValidatorService.checkTLS(tlsInfo);
-
-      const allSecurityIssues = [...headerResults, ...tlsResults];
-      const securityScoreResult =
-        this.securityMapperService.calculateSecurityScore(allSecurityIssues);
-
-      (comprehensiveAuditData as any).securityScore = securityScoreResult.score;
-      (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
-
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`,
-      );
-      try {
-        const hostname = new URL(url).hostname;
-        const mozResult = await this.mozObservatoryService.analyze(hostname);
-        if (mozResult) {
-          (comprehensiveAuditData as any).securityMozillaGrade =
-            mozResult.grade;
-          (comprehensiveAuditData as any).securityMozillaScore =
-            mozResult.score;
-          (comprehensiveAuditData as any).securityMozillaTests = {
-            passed: mozResult.testsPassed || mozResult.tests_passed,
-            failed: mozResult.testsFailed || mozResult.tests_failed,
-          };
-        } else {
-          // Fallback if API returns null
-          (comprehensiveAuditData as any).securityMozillaGrade =
-            securityScoreResult.mozillaResult.grade;
-        }
-      } catch (e) {
-        this.logger.warn(
-          `Mozilla Observatory failed for ${url}, using fallback grade`,
+        this.logger.debug(
+          `[Job ${job.id}] Step 2.6: Running security audit...`,
         );
-        // Fallback if unexpected error occurs
-        (comprehensiveAuditData as any).securityMozillaGrade =
-          securityScoreResult.mozillaResult.grade;
-      }
+        const headers = (crawlData as any).headers || {};
+        const tlsInfo = (crawlData as any).tlsInfo || null;
 
-      this.logger.debug(`[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`);
-      const htmlCssResult =
-        this.htmlCssMapperService.processHtmlCssAudit(crawlData);
+        const headerResults =
+          this.headerCheckerService.checkSecurityHeaders(headers);
+        const tlsResults = this.tlsValidatorService.checkTLS(tlsInfo);
 
-      (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
-      (comprehensiveAuditData as any).htmlIssues = htmlCssResult.issues.filter(
-        (i) => i.id.startsWith('HTML-'),
-      );
-      (comprehensiveAuditData as any).cssScore = htmlCssResult.cssScore;
-      (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(
-        (i) => i.id.startsWith('CSS-'),
-      );
+        const allSecurityIssues = [...headerResults, ...tlsResults];
+        const securityScoreResult =
+          this.securityMapperService.calculateSecurityScore(allSecurityIssues);
 
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.7.5: Detecting technology stack...`,
-      );
-      const technologies = this.techDetectorService.detect(
-        (crawlData as any).htmlContent,
-        (crawlData as any).headers || {},
-      );
-      (comprehensiveAuditData as any).technologies = technologies;
+        (comprehensiveAuditData as any).securityScore =
+          securityScoreResult.score;
+        (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
 
-      this.logger.debug(
-        `[Job ${job.id}] Step 2.8: Calculating Final Scores...`,
-      );
-
-      const engineScores: EngineScore[] = [];
-
-      if ((comprehensiveAuditData as any).seoIssues) {
-        engineScores.push(
-          ScoringService.calculateEngineScore(
-            'seo',
-            (comprehensiveAuditData as any).seoIssues,
-          ),
+        this.logger.debug(
+          `[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`,
         );
-      }
-      if ((comprehensiveAuditData as any).performanceIssues) {
-        engineScores.push(
-          ScoringService.calculateEngineScore(
-            'performance',
-            (comprehensiveAuditData as any).performanceIssues,
-          ),
-        );
-      }
-
-      const overallResult = ScoringService.calculateOverallScore(engineScores);
-      (comprehensiveAuditData as any).overallScore = overallResult.overallScore;
-      (comprehensiveAuditData as any).scoreLabel = overallResult.label;
-      (comprehensiveAuditData as any).scoreColor = overallResult.color;
-      (comprehensiveAuditData as any).scoreBreakdown = overallResult.breakdown;
-
-      // Extract and map evidence
-      const screenshots = flattenScreenshots((crawlData as any).screenshots);
-      const referenceLinks: ReferenceLink[] = [];
-
-      const addedRefs = new Set<string>();
-
-      // WCAG Links
-      if ((comprehensiveAuditData as any).accessibility) {
-        for (const issue of (comprehensiveAuditData as any).accessibility) {
-          const match = Object.entries(WCAG_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'wcag',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      // Security Links
-      if ((comprehensiveAuditData as any).securityIssues) {
-        for (const issue of (comprehensiveAuditData as any).securityIssues) {
-          const match = Object.entries(SECURITY_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'security',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      // Perf Links
-      if ((comprehensiveAuditData as any).performanceIssues) {
-        for (const issue of (comprehensiveAuditData as any).performanceIssues) {
-          const match = Object.entries(PERF_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'performance',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      // SEO Links
-      if ((comprehensiveAuditData as any).seoIssues) {
-        for (const issue of (comprehensiveAuditData as any).seoIssues) {
-          const match = Object.entries(SEO_REFERENCES).find(
-            ([key]) => issue.id && issue.id.includes(key),
-          );
-          if (match && (match as any[]).length > 1 && (match as any[])[1]) {
-            const m = (match as any)[1];
-            if (m.url && !addedRefs.has(m.url as string)) {
-              referenceLinks.push({
-                title: m.title as string,
-                url: m.url as string,
-                category: 'seo',
-              });
-              addedRefs.add(m.url as string);
-            }
-          }
-        }
-      }
-
-      this.logger.debug(
-        `[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`,
-      );
-      await job.updateProgress({
-        auditId,
-        step: 'analyzed',
-        progress: 70,
-        data: comprehensiveAuditData,
-      });
-
-      this.logger.debug(`[Job ${job.id}] Step 3: Generating AI Summary...`);
-      const aiSummary = await this.aiService.generateSummary({
-        url,
-        ...comprehensiveAuditData,
-      });
-      this.logger.debug(
-        `[Job ${job.id}] Step 3 Complete: AI Summary generated`,
-      );
-      await job.updateProgress({
-        auditId,
-        step: 'summarized',
-        progress: 90,
-        data: { aiSummary: JSON.stringify(aiSummary) },
-      });
-
-      const rawHeaders = (crawlData as any).headers || {};
-      const serverHeader =
-        (crawlData as any).mainHeaders?.server ||
-        rawHeaders['server'] ||
-        'Unknown';
-      const cdn =
-        detectCdn((crawlData as any).mainHeaders) || detectCdn(rawHeaders);
-      const serverInfo = {
-        server: serverHeader,
-        cdn: cdn,
-      };
-
-      const resultData: AuditResult = {
-        id: auditId,
-        auditId: auditId,
-        url: url,
-        serverInfo: serverInfo,
-        ...(comprehensiveAuditData as any),
-        screenshots,
-        referenceLinks,
-        aiSummary: JSON.stringify(aiSummary),
-        aiCategoryAnalysis: aiSummary.categoryAnalysis || {},
-        summary:
-          typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary),
-      };
-
-      this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
-
-      // Close browser after all analysis is done
-      if ((crawlData as {browser?: {close: () => Promise<void>}}).browser) {
         try {
-          await (crawlData as {browser: {close: () => Promise<void>}}).browser.close();
-        } catch (e) {}
+          const hostname = new URL(url).hostname;
+          const mozResult = await this.mozObservatoryService.analyze(hostname);
+          if (mozResult) {
+            (comprehensiveAuditData as any).securityMozillaGrade =
+              mozResult.grade;
+            (comprehensiveAuditData as any).securityMozillaScore =
+              mozResult.score;
+            (comprehensiveAuditData as any).securityMozillaTests = {
+              passed: mozResult.testsPassed || mozResult.tests_failed,
+              failed: mozResult.testsFailed || mozResult.tests_failed,
+            };
+          } else {
+            (comprehensiveAuditData as any).securityMozillaGrade =
+              securityScoreResult.mozillaResult.grade;
+          }
+        } catch (e) {
+          this.logger.warn(
+            `Mozilla Observatory failed for ${url}, using fallback grade`,
+          );
+          (comprehensiveAuditData as any).securityMozillaGrade =
+            securityScoreResult.mozillaResult.grade;
+        }
+
+        this.logger.debug(
+          `[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`,
+        );
+        const htmlCssResult =
+          this.htmlCssMapperService.processHtmlCssAudit(crawlData);
+
+        (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
+        (comprehensiveAuditData as any).htmlIssues =
+          htmlCssResult.issues.filter((i) => i.id.startsWith('HTML-'));
+        (comprehensiveAuditData as any).cssScore = htmlCssResult.cssScore;
+        (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(
+          (i) => i.id.startsWith('CSS-'),
+        );
+
+        this.logger.debug(
+          `[Job ${job.id}] Step 2.7.5: Detecting technology stack...`,
+        );
+        const technologies = this.techDetectorService.detect(
+          (crawlData as any).htmlContent,
+          (crawlData as any).headers || {},
+        );
+        (comprehensiveAuditData as any).technologies = technologies;
+
+        this.logger.debug(
+          `[Job ${job.id}] Step 2.8: Calculating Final Scores...`,
+        );
+
+        const engineScores: EngineScore[] = [];
+
+        if ((comprehensiveAuditData as any).seoIssues) {
+          engineScores.push(
+            ScoringService.calculateEngineScore(
+              'seo',
+              (comprehensiveAuditData as any).seoIssues,
+            ),
+          );
+        }
+        if ((comprehensiveAuditData as any).performanceIssues) {
+          engineScores.push(
+            ScoringService.calculateEngineScore(
+              'performance',
+              (comprehensiveAuditData as any).performanceIssues,
+            ),
+          );
+        }
+
+        const overallResult =
+          ScoringService.calculateOverallScore(engineScores);
+        (comprehensiveAuditData as any).overallScore =
+          overallResult.overallScore;
+        (comprehensiveAuditData as any).scoreLabel = overallResult.label;
+        (comprehensiveAuditData as any).scoreColor = overallResult.color;
+        (comprehensiveAuditData as any).scoreBreakdown =
+          overallResult.breakdown;
+
+        const screenshots = flattenScreenshots((crawlData as any).screenshots);
+        const referenceLinks: ReferenceLink[] = [];
+
+        const addedRefs = new Set<string>();
+
+        // WCAG Links
+        if ((comprehensiveAuditData as any).accessibility) {
+          for (const issue of (comprehensiveAuditData as any).accessibility) {
+            const match = Object.entries(WCAG_REFERENCES).find(
+              ([key]) => issue.id && issue.id.includes(key),
+            );
+            if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+              const m = (match as any)[1];
+              if (m.url && !addedRefs.has(m.url as string)) {
+                referenceLinks.push({
+                  title: m.title as string,
+                  url: m.url as string,
+                  category: 'wcag',
+                });
+                addedRefs.add(m.url as string);
+              }
+            }
+          }
+        }
+
+        // Security Links
+        if ((comprehensiveAuditData as any).securityIssues) {
+          for (const issue of (comprehensiveAuditData as any).securityIssues) {
+            const match = Object.entries(SECURITY_REFERENCES).find(
+              ([key]) => issue.id && issue.id.includes(key),
+            );
+            if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+              const m = (match as any)[1];
+              if (m.url && !addedRefs.has(m.url as string)) {
+                referenceLinks.push({
+                  title: m.title as string,
+                  url: m.url as string,
+                  category: 'security',
+                });
+                addedRefs.add(m.url as string);
+              }
+            }
+          }
+        }
+
+        // Perf Links
+        if ((comprehensiveAuditData as any).performanceIssues) {
+          for (const issue of (comprehensiveAuditData as any)
+            .performanceIssues) {
+            const match = Object.entries(PERF_REFERENCES).find(
+              ([key]) => issue.id && issue.id.includes(key),
+            );
+            if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+              const m = (match as any)[1];
+              if (m.url && !addedRefs.has(m.url as string)) {
+                referenceLinks.push({
+                  title: m.title as string,
+                  url: m.url as string,
+                  category: 'performance',
+                });
+                addedRefs.add(m.url as string);
+              }
+            }
+          }
+        }
+
+        // SEO Links
+        if ((comprehensiveAuditData as any).seoIssues) {
+          for (const issue of (comprehensiveAuditData as any).seoIssues) {
+            const match = Object.entries(SEO_REFERENCES).find(
+              ([key]) => issue.id && issue.id.includes(key),
+            );
+            if (match && (match as any[]).length > 1 && (match as any[])[1]) {
+              const m = (match as any)[1];
+              if (m.url && !addedRefs.has(m.url as string)) {
+                referenceLinks.push({
+                  title: m.title as string,
+                  url: m.url as string,
+                  category: 'seo',
+                });
+                addedRefs.add(m.url as string);
+              }
+            }
+          }
+        }
+
+        this.logger.debug(
+          `[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`,
+        );
+        await job.updateProgress({
+          auditId,
+          step: 'analyzed',
+          progress: 70,
+          data: comprehensiveAuditData,
+        });
+
+        this.logger.debug(`[Job ${job.id}] Step 3: Generating AI Summary...`);
+        const aiSummary = await this.aiService.generateSummary({
+          url,
+          ...comprehensiveAuditData,
+        });
+        this.logger.debug(
+          `[Job ${job.id}] Step 3 Complete: AI Summary generated`,
+        );
+        await job.updateProgress({
+          auditId,
+          step: 'summarized',
+          progress: 90,
+          data: { aiSummary: JSON.stringify(aiSummary) },
+        });
+
+        const rawHeaders = (crawlData as any).headers || {};
+        const serverHeader =
+          (crawlData as any).mainHeaders?.server ||
+          rawHeaders['server'] ||
+          'Unknown';
+        const cdn =
+          detectCdn((crawlData as any).mainHeaders) || detectCdn(rawHeaders);
+        const serverInfo = {
+          server: serverHeader,
+          cdn: cdn,
+        };
+
+        const resultData: AuditResult = {
+          id: auditId,
+          auditId: auditId,
+          url: url,
+          serverInfo: serverInfo,
+          ...(comprehensiveAuditData as any),
+          screenshots,
+          referenceLinks,
+          aiSummary: JSON.stringify(aiSummary),
+          aiCategoryAnalysis: aiSummary.categoryAnalysis || {},
+          summary:
+            typeof aiSummary === 'string'
+              ? aiSummary
+              : JSON.stringify(aiSummary),
+        };
+
+        this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
+        await this.redisService.setAuditResult(auditId, resultData);
+
+        this.logger.log(
+          `[Job ${job.id}] Fully completed audit for URL: ${url}`,
+        );
+        await job.updateProgress({ auditId, step: 'completed', progress: 100 });
+        return { success: true, result: resultData };
+      } finally {
+        await crawlData.browser.close().catch(() => {});
       }
-
-      await this.redisService.setAuditResult(auditId, resultData);
-
-      this.logger.log(`[Job ${job.id}] Fully completed audit for URL: ${url}`);
-      await job.updateProgress({ auditId, step: 'completed', progress: 100 });
-
-      return { success: true, result: resultData };
     } catch (error: any) {
       this.logger.error(`[Job ${job.id}] Audit failed for ${url}:`, error);
 

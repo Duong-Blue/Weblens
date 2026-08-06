@@ -4,7 +4,7 @@ COPY . .
 RUN npm ci
 
 FROM base AS builder
-RUN npm run build --prefix apps/worker
+RUN npm run build --prefix packages/audit-engine && npm run build --prefix packages/tech-detector && npm run build --prefix packages/shared-types && npm run build --prefix apps/worker
 
 FROM mcr.microsoft.com/playwright:v1.62.0-jammy AS runner
 WORKDIR /app

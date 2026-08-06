@@ -115,4 +115,41 @@ describe('FallbackLighthouseEngine', () => {
     const result = engine.score(input);
     expect(result.bestPractices).toBe(90);
   });
+
+  it('compute() should delegate to score() for all-good case', () => {
+    const input = {
+      performanceTiming: {},
+      cwv: {},
+      networkRequests: [],
+      consoleMessages: [],
+      htmlContent: '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width"><title>Title 10-70 chars</title><meta name="description" content="a description"></head><body><h1>H1</h1><h2>H2</h2><img src="x" alt="x"></body></html>'
+    } as any;
+    const result = FallbackLighthouseEngine.compute(input);
+    expect(result.source).toBe('fallback');
+    expect(result.performance).toBeNull();
+    expect(result.accessibility).toBe(100);
+    expect(result.bestPractices).toBe(100);
+    expect(result.seo).toBe(100);
+  });
+
+  it('static.compute() should equal instance score() for all-bad case', () => {
+    const input = {
+      performanceTiming: {},
+      cwv: {},
+      networkRequests: [
+        { url: 'x', status: 404, resourceType: 'document' },
+        { url: 'y', status: 404, resourceType: 'document' }
+      ],
+      consoleMessages: [
+        { type: 'error', text: 'e1' }, { type: 'error', text: 'e2' },
+        { type: 'error', text: 'e3' }, { type: 'error', text: 'e4' },
+        { type: 'error', text: 'e5' },
+        { type: 'warning', text: 'w1' }, { type: 'warning', text: 'w2' },
+        { type: 'warning', text: 'w3' }
+      ],
+      htmlContent: '<html></html>'
+    } as any;
+    const combined = FallbackLighthouseEngine.compute(input);
+    expect(combined).toEqual(engine.score(input));
+  });
 });

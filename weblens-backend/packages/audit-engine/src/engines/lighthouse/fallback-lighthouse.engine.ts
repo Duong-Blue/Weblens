@@ -5,6 +5,10 @@ export type FallbackEngineInput = Pick<CrawlResult, 'performanceTiming' | 'cwv' 
 
 @Injectable()
 export class FallbackLighthouseEngine {
+  static compute(data: FallbackEngineInput): LighthouseData {
+    return new FallbackLighthouseEngine().score(data);
+  }
+
   score(data: FallbackEngineInput): LighthouseData {
     const htmlContent = data.htmlContent || '';
     const consoleMessages = data.consoleMessages || [];

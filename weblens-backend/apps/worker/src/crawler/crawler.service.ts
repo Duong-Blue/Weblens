@@ -29,6 +29,8 @@ interface RobotsInfo {
 
 // Script injected before navigation to capture Core Web Vitals via PerformanceObserver.
 // Runs in-browser — uses plain JS (no TS-specific syntax) so addInitScript stringification is safe.
+export const MAX_SCROLLS = 20;
+export const MAX_SCROLL_TIME_MS = 15000;
 export const CWV_SCRIPT = `
 window.__cwv = { lcp: undefined, inp: undefined, cls: 0 };
 
@@ -108,7 +110,7 @@ export class CrawlerService {
       await dns.promises.resolve(hostname);
     } catch (error) {
       throw new Error(
-        `ERR_NAME_NOT_RESOLVED: Cannot resolve domain "${hostname}"...`,
+        'ERR_NAME_NOT_RESOLVED: Cannot resolve domain ' + hostname,
       );
     }
   }
@@ -122,7 +124,7 @@ export class CrawlerService {
     const port = await getPort();
     const browser: Browser = await chromium.launch({
       headless: true,
-      args: [`--remote-debugging-port=${port}`],
+      args: ['--remote-debugging-port=' + port],
     });
 
     let success = false;
@@ -172,7 +174,8 @@ export class CrawlerService {
 
           const serverHeader = await response.serverAddr().catch(() => null);
           if (serverHeader) {
-            req.remoteAddress = `${serverHeader.ipAddress}:${serverHeader.port}`;
+            req.remoteAddress =
+              serverHeader.ipAddress + ':' + serverHeader.port;
           }
 
           const securityDetails = await response
@@ -237,7 +240,9 @@ export class CrawlerService {
         cwv = JSON.parse(cwvRaw);
         if (cwv.inp === undefined) {
           this.logger.log(
-            `INP not collected for ${url}: requires real user interaction; report shows 'no data'`,
+            'INP not collected for ' +
+              url +
+              ": requires real user interaction; report shows 'no data'",
           );
         }
       } catch {
@@ -275,10 +280,12 @@ export class CrawlerService {
         browser,
       };
 
-      let lighthouseData: LighthouseData;
+      let lighthouseData: LighthouseData | null;
       try {
-        this.logger.log(`Running Lighthouse for ${url} on port ${port}...`);
-        const lhModule: any = await eval(`import('lighthouse')`);
+        this.logger.log(
+          'Running Lighthouse for ' + url + ' on port ' + port + '...',
+        );
+        const lhModule: any = await eval("import('lighthouse')");
         const lighthouseFn = lhModule.default || lhModule;
         const lhResult = await lighthouseFn(url, {
           port,
@@ -297,7 +304,20 @@ export class CrawlerService {
         }
 
         const categories = lhResult.lhr.categories;
-        lighthouseData = { source: 'lighthouse', performance: categories.performance?.score != null ? Math.round(categories.performance.score * 100) : null, accessibility: Math.round((categories.accessibility?.score ?? 0) * 100), bestPractices: Math.round((categories['best-practices']?.score ?? 0) * 100), seo: Math.round((categories.seo?.score ?? 0) * 100) };
+        lighthouseData = {
+          source: 'lighthouse',
+          performance:
+            categories.performance?.score != null
+              ? Math.round(categories.performance.score * 100)
+              : null,
+          accessibility: Math.round(
+            (categories.accessibility?.score ?? 0) * 100,
+          ),
+          bestPractices: Math.round(
+            (categories['best-practices']?.score ?? 0) * 100,
+          ),
+          seo: Math.round((categories.seo?.score ?? 0) * 100),
+        };
         this.logger.log(`Lighthouse completed successfully for ${url}`);
       } catch (error) {
         this.logger.error(`Lighthouse failed for ${url}:`, error);
@@ -318,7 +338,7 @@ export class CrawlerService {
     }
   }
 
-  private scrollPageWithLazyLoad(page: Page) {
+  private async scrollPageWithLazyLoad(page: Page) {
     const scrollDelay = 200;
     const scrollStep = 500;
     const lazyWait = 1000;
