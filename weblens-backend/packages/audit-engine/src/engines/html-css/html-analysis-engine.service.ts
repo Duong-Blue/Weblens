@@ -4,13 +4,13 @@ import { HtmlCheckerService } from './html-checker.service';
 import { CssCheckerService } from './css-checker.service';
 
 @Injectable()
-export class HtmlCssMapperService {
+export class HtmlAnalysisEngineService {
   constructor(
     private readonly htmlChecker: HtmlCheckerService,
     private readonly cssChecker: CssCheckerService,
   ) {}
 
-  public processHtmlCssAudit(crawlData: any): { htmlScore: number; cssScore: number; issues: AuditIssue[] } {
+  public analyze(crawlData: any): { htmlScore: number; cssScore: number; issues: AuditIssue[] } {
     const htmlIssues = this.htmlChecker.checkHTMLStructure(crawlData);
     const cssIssues = this.cssChecker.checkCSS(crawlData);
     
@@ -21,6 +21,11 @@ export class HtmlCssMapperService {
       cssScore: this.calculateCssScore(cssIssues),
       issues: allIssues,
     };
+  }
+
+  // Keeping this for backward compatibility temporarily if something else uses it
+  public processHtmlCssAudit(crawlData: any): { htmlScore: number; cssScore: number; issues: AuditIssue[] } {
+    return this.analyze(crawlData);
   }
 
   private calculateHtmlScore(issues: AuditIssue[]): number {
