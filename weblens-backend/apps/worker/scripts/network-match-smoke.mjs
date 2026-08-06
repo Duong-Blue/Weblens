@@ -39,7 +39,6 @@ server.listen(0, async () => {
       this.logger = mockLogger;
     }
     async validateDomain() { return Promise.resolve(); }
-    async captureSerpScreenshots() { return []; }
   }
   
   const crawler = new TestCrawler();
