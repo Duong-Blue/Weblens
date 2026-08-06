@@ -12,14 +12,27 @@ export class SeoEngineService {
     let score = 0;
 
     for (const rule of SEO_RULES) {
-      const passed = rule.passCondition(ctx);
-      
-      if (passed) {
-        score += rule.additivePoints;
+      const evaluation = rule.evaluate
+        ? rule.evaluate(ctx)
+        : rule.passCondition
+          ? {
+              passed: rule.passCondition(ctx),
+              actual: 'Condition met',
+              expected: 'Condition should be met',
+            }
+          : {
+              passed: false,
+              actual: 'Rule could not be evaluated',
+              expected: 'Rule should evaluate successfully',
+              summary: 'This rule has no evaluation implementation.',
+            };
+
+      if (evaluation.passed) {
+        score += evaluation.points ?? rule.additivePoints;
       }
 
       const issue = IssueFactory.bool(
-        passed,
+        evaluation.passed,
         'seo',
         rule.ruleId,
         rule.title,
@@ -28,19 +41,32 @@ export class SeoEngineService {
         rule.weight,
         'SEO',
         rule.impact,
-        passed ? 'Condition met' : 'Condition failed',
-        'Condition should be met',
+        evaluation.actual,
+        evaluation.expected,
         rule.evidenceType,
         'seo-engine',
-        rule.recommendation
+        evaluation.recommendation ?? rule.recommendation
       );
 
-      // Map reference if available
+      const evidence = issue.evidence[0];
+      if (evidence) {
+        if (evaluation.summary) {
+          evidence.textContent = evaluation.summary;
+        }
+        if (evaluation.details && evaluation.details.length > 0) {
+          evidence.details = evaluation.details;
+          evidence.actual = `${evidence.actual} (${evaluation.details.join(
+            '; '
+          )})`;
+        }
+      }
+
       const ref = SEO_REFERENCES[rule.ruleId];
-      if (ref && !issue.recommendation) {
-         issue.recommendation = `See ${ref} for more information.`;
-      } else if (ref && issue.recommendation) {
-         issue.recommendation = `${issue.recommendation} See ${ref} for more information.`;
+      if (ref) {
+        const refText = `${ref.title}: ${ref.url}`;
+        issue.recommendation = issue.recommendation
+          ? `${issue.recommendation} See ${refText}.`
+          : `See ${refText}.`;
       }
 
       issues.push(issue);
