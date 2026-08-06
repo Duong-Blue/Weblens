@@ -6,7 +6,6 @@ import { useSocket } from "@/features/audit/hooks/useSocket";
 import { TechStackSection } from "@/features/audit/components/TechStackSection";
 import { AiSummarySection } from "@/features/audit/components/AiSummarySection";
 import { MetricBlock } from "@/features/audit/components/MetricBlock";
-import { ScreenshotGallery } from "@/features/audit/components/ScreenshotGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -251,17 +250,6 @@ export default function Home() {
             {result && (
               <div className="p-10 sm:p-14 space-y-16">
                 <TechStackSection techStack={result.techStack} />
-                
-                {result.screenshots ? (
-                  <ScreenshotGallery screenshots={result.screenshots} />
-                ) : (
-                  <div className="flex items-center justify-center p-12 bg-zinc-50 rounded-3xl border border-zinc-200/50 shadow-sm animate-pulse">
-                    <div className="flex flex-col items-center gap-3 text-zinc-400">
-                      <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-500 rounded-full animate-spin"></div>
-                      <span className="font-medium">Generating screenshots...</span>
-                    </div>
-                  </div>
-                )}
                 
                 <section>
                   <h3 className="text-xl font-semibold text-zinc-900 mb-8">Detailed Analysis</h3>

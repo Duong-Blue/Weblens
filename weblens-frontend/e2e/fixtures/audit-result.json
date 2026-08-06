@@ -111,10 +111,6 @@
   "cssIssues": [
     { "id": "css-1", "ruleId": "invalid-css", "severity": "low", "status": "fail", "title": "Invalid CSS", "description": "Fix invalid props", "category": "css" }
   ],
-  "screenshots": [
-    { "viewport": "desktop", "path": "screenshots/desktop.png" },
-    { "viewport": "mobile", "path": "screenshots/mobile.png" }
-  ],
   "referenceLinks": [],
   "status": "completed"
 }

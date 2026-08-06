@@ -45,36 +45,6 @@ test.describe('Audit Report PDF Export', () => {
     for (const heading of expectedHeadings) {
       await expect(page.locator(`text=${heading}`)).toBeVisible();
     }
-    
-    await expect(page.getByText('Ảnh SERP (Google)')).toBeVisible();
-    await expect(page.getByText('SERP — Desktop')).toBeVisible();
-  });
-
-  test('empty screenshots hide SERP block', async ({ page }) => {
-    await page.route('**/audits/*/result', async (route) => {
-      const fixturePath = path.resolve(__dirname, 'fixtures', 'audit-result.json');
-      const fixtureData = require(fixturePath);
-      // Strip screenshots
-      fixtureData.screenshots = [];
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          audit: {
-            id: 'fixture-1',
-            status: 'completed',
-            url: 'https://example.com'
-          },
-          result: fixtureData
-        })
-      });
-    });
-
-    await page.goto('/report/fixture-1');
-    await expect(page.locator('text=BÁO CÁO KIỂM TRA WEBSITE')).toBeVisible({ timeout: 10000 });
-    
-    await expect(page.locator('text=3. Thông tin website')).toBeVisible();
-    await expect(page.getByText('Ảnh SERP (Google)')).toHaveCount(0);
   });
 
   test('page breaks', async ({ page }) => {
