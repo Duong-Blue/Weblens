@@ -1,11 +1,3 @@
-export interface AuditScreenshot {
-  viewport: string;
-  path: string;
-  width: number;
-  height: number;
-  fileSize: number;
-}
-
 export interface ReferenceLink {
   title: string;
   url: string;
@@ -146,7 +138,6 @@ export interface AuditResult {
   audit: Record<string, unknown>; // Keep loosely typed if needed, or remove if unused, but per instructions don't change fields. We'll use any as Audit entity was removed.
 
   // Evidence
-  screenshots?: AuditScreenshot[];
   referenceLinks?: ReferenceLink[];
 
   // 1. Performance

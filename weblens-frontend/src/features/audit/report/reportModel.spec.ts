@@ -3,8 +3,10 @@ import { buildReportModel, SeverityRanking } from './reportModel';
 import { AuditResult } from '../../../types/audit';
 
 describe('reportModel', () => {
-  const baseResult: Partial<AuditResult> = {
+    const baseResult: Partial<AuditResult> = {
     id: 'test-123',
+    auditId: 'test-audit-id',
+    audit: {},
     perfScore: 80,
     seoScore: 90,
     accScore: 70,
@@ -25,6 +27,8 @@ describe('reportModel', () => {
   it('handles null values safely', () => {
     const nullResult = {
       id: 'test-null',
+      auditId: 'test-audit-id',
+      audit: {},
       perfScore: 0,
       seoScore: 0,
       accScore: 0,
@@ -152,21 +156,6 @@ describe('reportModel', () => {
      expect(model.seoCriterias.find(c => c.id === 'meta-desc')?.passed).toBe(true);
      expect(model.seoCriterias.find(c => c.id === 'h1')?.passed).toBe(true);
      expect(model.seoCriterias.find(c => c.id === 'social')?.passed).toBe(true);
-  });
-
-  it('flattens screenshots', () => {
-      const result = {
-          ...baseResult,
-          screenshots: {
-              desktop: { viewport: 'desktop', path: '/desk.jpg', width: 1920, height: 1080, fileSize: 100 },
-              mobile: { viewport: 'mobile', path: '/mob.jpg', width: 375, height: 812, fileSize: 50 }
-          }
-      };
-      
-      const model = buildReportModel(result as any, {});
-      expect(model.screenshots).toHaveLength(2);
-      expect(model.screenshots[0].viewport).toBe('desktop');
-      expect(model.screenshots[1].viewport).toBe('mobile');
   });
 
   it('generates tool list from technologies', () => {

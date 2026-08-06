@@ -1,4 +1,4 @@
-import { AuditResult, AuditScreenshot, TechItem } from '../../../types/audit';
+import { AuditResult, TechItem } from '../../../types/audit';
 
 export interface ReportIssue {
   id?: string;
@@ -43,7 +43,6 @@ export interface ReportModel {
   improvements: { area: string; recommendations: string[] }[];
   tools: TechItem[];
   resourceBreakdown: Record<string, number>;
-  screenshots: AuditScreenshot[];
   loadTime?: number;
   heavyResources?: Array<{ url: string; type: string; size: number }>;
   budgetStatus?: { totalSize: number; limit: number; isOverBudget: boolean };
@@ -224,23 +223,6 @@ export function buildReportModel(
       Object.assign(resourceBreakdown, result.networkDetails.summaryByType);
   }
 
-  // Screenshots flattening
-  let screenshots: AuditScreenshot[] = [];
-  if (result.screenshots) {
-      if (Array.isArray(result.screenshots)) {
-          screenshots = result.screenshots;
-      } else {
-          const groups = Object.values(result.screenshots);
-          screenshots = groups.flatMap((group: any) => {
-              if (!group || typeof group !== 'object') return [];
-              if (group.viewport || group.path) {
-                  return [group as AuditScreenshot];
-              }
-              return Object.values(group).filter((item: any) => typeof item === 'object' && item !== null) as AuditScreenshot[];
-          }).filter(Boolean);
-      }
-  }
-
   const accWcag = result.accDetails?.wcag || [];
 
   return {
@@ -262,7 +244,6 @@ export function buildReportModel(
     improvements,
     tools,
     resourceBreakdown,
-    screenshots,
     seoDetails: result.seoDetails || undefined,
     securityDetails: result.securityDetails || undefined,
     accWcag,
