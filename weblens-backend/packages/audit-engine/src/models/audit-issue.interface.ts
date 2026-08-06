@@ -46,6 +46,7 @@ export interface Evidence {
   textContent?: string;
   value?: string;
   diff?: string;
+  details?: string[];
   
   // Binary
   screenshotPath?: string;
