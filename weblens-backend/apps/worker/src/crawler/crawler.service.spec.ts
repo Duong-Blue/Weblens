@@ -67,7 +67,6 @@ describe('CrawlerService Network Matching', () => {
     jest.spyOn(dns.promises, 'resolve').mockResolvedValue(['127.0.0.1'] as any);
     
     (service as any).scrollPageWithLazyLoad = jest.fn().mockResolvedValue(undefined);
-    (service as any).captureSerpScreenshots = jest.fn().mockResolvedValue([]);
     (service as any).fetchSitemap = jest.fn().mockResolvedValue({ found: false });
     (service as any).fetchRobotsTxt = jest.fn().mockResolvedValue({ found: false });
 
@@ -150,9 +149,13 @@ describe('CWV_SCRIPT CLS session-window algorithm', () => {
   };
 
   const emitEntry = (
-    callback: (list: { getEntries: () => any[] }) => void,
+    callback: ((list: { getEntries: () => any[] }) => void) | undefined,
     entry: any,
-  ) => callback({ getEntries: () => [entry] });
+  ) => {
+    if (callback) {
+      callback({ getEntries: () => [entry] });
+    }
+  };
 
   it('accumulates entries in the same session and resets when a gap spans >= 1s', () => {
     const { fakeWindow, getObserver } = runHarness();
@@ -262,60 +265,3 @@ describe('CrawlerService scrollPageWithLazyLoad', () => {
   });
 });
 
-describe('CrawlerService hasSerpResults', () => {
-  let service: CrawlerService;
-
-  beforeEach(() => {
-    service = new CrawlerService();
-  });
-
-  const makeLocator = (countValue: number) => ({
-    first: () => ({ count: () => Promise.resolve(countValue) }),
-  });
-
-  it('returns true when the Google results container is present (layer 1)', async () => {
-    const fakePg = {
-      locator: jest.fn((selector: string) =>
-        makeLocator(selector === '#search, #rso' ? 1 : 0),
-      ),
-    };
-    const result = await (service as any).hasSerpResults(fakePg, 'example.com');
-    expect(result).toBe(true);
-    expect(fakePg.locator).toHaveBeenCalledWith('#search, #rso');
-    // All three layers are built eagerly, then evaluated in order.
-    expect(fakePg.locator).toHaveBeenCalledTimes(3);
-  });
-
-  it('falls back to result links pointing at the domain (layer 2)', async () => {
-    const fakePg = {
-      locator: jest.fn((selector: string) => {
-        if (selector.includes('a[href*="example.com"]')) return makeLocator(1);
-        return makeLocator(0);
-      }),
-    };
-    const result = await (service as any).hasSerpResults(fakePg, 'example.com');
-    expect(result).toBe(true);
-    expect(fakePg.locator).toHaveBeenCalledTimes(3);
-  });
-
-  it('falls back to Google /url?q= redirect links (layer 3)', async () => {
-    const fakePg = {
-      locator: jest.fn((selector: string) => {
-        if (selector.includes('/url?q=')) return makeLocator(2);
-        return makeLocator(0);
-      }),
-    };
-    const result = await (service as any).hasSerpResults(fakePg, 'example.com');
-    expect(result).toBe(true);
-    expect(fakePg.locator).toHaveBeenCalledTimes(3);
-  });
-
-  it('returns false when all three layers fail', async () => {
-    const fakePg = {
-      locator: jest.fn(() => makeLocator(0)),
-    };
-    const result = await (service as any).hasSerpResults(fakePg, 'example.com');
-    expect(result).toBe(false);
-    expect(fakePg.locator).toHaveBeenCalledTimes(3);
-  });
-});

@@ -4,15 +4,12 @@ import type { Request } from 'playwright';
 import { URL } from 'url';
 // We need to dynamically import get-port since it's an ESM package
 // const getPort = require('get-port');
-import * as fs from 'fs';
-import * as path from 'path';
 import * as dns from 'dns';
 import {
   CrawlSession,
   ConsoleMessageEntry,
   NetworkRequest,
   LighthouseData,
-  ScreenshotItem,
 } from '@weblens/audit-engine';
 
 interface SitemapInfo {
@@ -222,8 +219,6 @@ export class CrawlerService {
 
       await page.waitForTimeout(3000);
 
-      const screenshots = await this.captureSerpScreenshots(browser, url);
-
       const cwvRaw = await page.evaluate(() =>
         JSON.stringify(
           (window as any).__cwv || { lcp: undefined, inp: undefined, cls: 0 },
@@ -275,7 +270,6 @@ export class CrawlerService {
         cwv,
         lighthouseData: undefined as any,
         mainHeaders,
-        screenshots,
         page,
         browser,
       };
@@ -383,135 +377,6 @@ export class CrawlerService {
 
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(500);
-  }
-
-  private async captureSerpScreenshots(
-    browser: Browser,
-    url: string,
-    serpBaseUrl: string = process.env.SERP_BASE_URL || 'https://www.google.com',
-  ): Promise<ScreenshotItem[]> {
-    try {
-      const reportDir =
-        process.env.REPORTS_DIR || path.resolve(process.cwd(), 'reports');
-      if (!fs.existsSync(reportDir)) {
-        fs.mkdirSync(reportDir, { recursive: true });
-      }
-
-      const domain = new URL(url).hostname;
-      const timestamp = Date.now();
-      const screenshotDir = path.join(reportDir, domain, timestamp.toString());
-      fs.mkdirSync(screenshotDir, { recursive: true });
-
-      const devices = [
-        {
-          device: 'desktop',
-          contextOptions: { viewport: { width: 1920, height: 1080 } },
-        },
-        {
-          device: 'mobile',
-          contextOptions: {
-            viewport: { width: 375, height: 812 },
-            userAgent:
-              'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-            isMobile: true,
-            hasTouch: true,
-          },
-        },
-      ];
-
-      const screenshots: ScreenshotItem[] = [];
-
-      for (const { device, contextOptions } of devices) {
-        let ctx;
-        try {
-          ctx = await browser.newContext(contextOptions);
-          const pg = await ctx.newPage();
-
-          // Pre-seed Google CONSENT cookie to reduce consent popups.
-          await ctx
-            .addCookies([
-              {
-                name: 'CONSENT',
-                value: 'YES+',
-                domain: '.google.com',
-                path: '/',
-              },
-            ])
-            .catch(() => {});
-
-          const searchUrl = `${serpBaseUrl}/search?q=${encodeURIComponent(domain)}`;
-          await pg.goto(searchUrl, {
-            waitUntil: 'domcontentloaded',
-            timeout: 30000,
-          });
-
-          // Broad consent-button matcher across regions/languages.
-          const consentRe =
-            /accept all|agree to all|i agree|tôi đồng ý|tôi chấp nhận|chấp nhận tất cả|đồng ý|alle akzeptieren|accepter tout|accepter/i;
-          const consentButton = pg
-            .getByRole('button', { name: consentRe })
-            .first();
-          if ((await consentButton.count()) > 0) {
-            await consentButton.click({ timeout: 3000 }).catch(() => {});
-          }
-          await pg.waitForTimeout(2500);
-
-          if (!(await this.hasSerpResults(pg, domain))) {
-            this.logger.warn(
-              `No SERP results found for ${domain} on ${device}`,
-            );
-            continue;
-          }
-
-          const buf = await pg.screenshot({
-            path: path.join(screenshotDir, `serp-${device}.png`),
-            fullPage: false,
-          });
-
-          screenshots.push({
-            viewport: device,
-            path: `${domain}/${timestamp}/serp-${device}.png`,
-            width: contextOptions.viewport.width,
-            height: contextOptions.viewport.height,
-            fileSize: buf.length,
-            format: 'png',
-            timestamp: Date.now(),
-            takenAtMs: 0,
-          });
-        } catch (deviceError) {
-          this.logger.warn(
-            `Failed to capture ${device} SERP screenshot for ${domain}: ${deviceError.message}`,
-          );
-        } finally {
-          if (ctx) await ctx.close().catch(() => {});
-        }
-      }
-
-      return screenshots;
-    } catch (e) {
-      this.logger.warn(`SERP screenshot failed for ${url}: ${e.message}`);
-      return [];
-    }
-  }
-
-  /**
-   * Detects whether the loaded page actually shows SERP results.
-   * Layer 1 is the Google results container; layers 2-3 are fallbacks that
-   * match result links pointing at the queried domain or via Google's /url
-   * redirect. Skips only when all three layers fail.
-   */
-  private async hasSerpResults(pg: Page, domain: string): Promise<boolean> {
-    const layers = [
-      pg.locator('#search, #rso').first(),
-      pg.locator(`a[href*="${domain}"]`).first(),
-      pg.locator('a[href*="/url?q="]').first(),
-    ];
-    for (const layer of layers) {
-      if ((await layer.count()) > 0) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private async fetchSitemap(targetUrl: string): Promise<SitemapInfo> {
