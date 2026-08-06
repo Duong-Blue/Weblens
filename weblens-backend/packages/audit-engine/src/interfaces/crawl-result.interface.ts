@@ -291,17 +291,6 @@ export interface FormInfo {
   totalButtons: number;
 }
 
-export interface ScreenshotItem {
-  viewport: string;
-  path: string;
-  width: number;
-  height: number;
-  fileSize: number;
-  format: 'png' | 'jpeg' | 'webp';
-  timestamp: number;
-  takenAtMs: number;
-}
-
 export interface CrawlResult {
   url?: string;
   normalizedUrl?: string;
@@ -381,8 +370,6 @@ export interface CrawlResult {
     sameSite: 'Strict' | 'Lax' | 'None' | undefined;
     session: boolean;
   }>;
-
-  screenshots?: ScreenshotItem[];
 
   domStats?: DOMStatistics;
   headingHierarchy?: HeadingHierarchy;

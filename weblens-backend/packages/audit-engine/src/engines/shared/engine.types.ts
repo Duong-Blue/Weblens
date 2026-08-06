@@ -1,5 +1,5 @@
 import { AuditIssue } from '../../models';
-import { CrawlResult, LighthouseData, NetworkRequest, ScreenshotItem } from '../../interfaces/crawl-result.interface';
+import { CrawlResult, LighthouseData, NetworkRequest } from '../../interfaces/crawl-result.interface';
 
 export interface EngineResult {
   score: number;
@@ -12,5 +12,4 @@ export interface EngineContext {
   lighthouseData?: LighthouseData | null;
   network?: NetworkRequest[];
   headers?: Record<string, string>;
-  screenshots?: ScreenshotItem[];
 }
