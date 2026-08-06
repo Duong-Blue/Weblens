@@ -25,11 +25,7 @@ import { MozObservatoryService } from './ai-service/moz-observatory.service';
 import { WCAG_REFERENCES } from '../../../packages/audit-engine/src/engines/accessibility/wcag-references';
 import { SECURITY_REFERENCES } from '../../../packages/audit-engine/src/engines/security/security-references';
 import { PERF_REFERENCES } from '../../../packages/audit-engine/src/engines/perf/perf-references';
-import {
-  AuditScreenshot,
-  ReferenceLink,
-  AuditResult,
-} from '@weblens/shared-types';
+import { ReferenceLink, AuditResult } from '@weblens/shared-types';
 
 function detectCdn(headers: any): string | undefined {
   if (!headers) return undefined;
@@ -53,18 +49,6 @@ function detectCdn(headers: any): string | undefined {
   return undefined;
 }
 
-export function flattenScreenshots(raw: unknown): AuditScreenshot[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((s: any) => ({
-      viewport: s.viewport,
-      path: s.path,
-      width: s.width || 0,
-      height: s.height || 0,
-      fileSize: s.fileSize || 0,
-    }))
-    .filter((s) => s.viewport && s.path);
-}
 
 @Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
 export class AuditProcessor extends WorkerHost {
@@ -263,7 +247,6 @@ export class AuditProcessor extends WorkerHost {
         (comprehensiveAuditData as any).scoreBreakdown =
           overallResult.breakdown;
 
-        const screenshots = flattenScreenshots((crawlData as any).screenshots);
         const referenceLinks: ReferenceLink[] = [];
 
         const addedRefs = new Set<string>();
@@ -392,7 +375,6 @@ export class AuditProcessor extends WorkerHost {
           url: url,
           serverInfo: serverInfo,
           ...(comprehensiveAuditData as any),
-          screenshots,
           referenceLinks,
           aiSummary: JSON.stringify(aiSummary),
           aiCategoryAnalysis: aiSummary.categoryAnalysis || {},
