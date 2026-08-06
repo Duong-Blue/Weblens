@@ -5,24 +5,25 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CrawlerService } from './crawler/crawler.service';
 import { 
-  AuditLogicService, 
-  AxeRunnerService, 
-  WcagMapperService, 
-  HeaderCheckerService, 
-  TlsValidatorService, 
-  SecurityMapperService, 
-  HtmlCheckerService, 
-  CssCheckerService, 
-  HtmlCssMapperService,
+  AccessibilityEngineService,
+  HtmlAnalysisEngineService,
   PerfEngineService,
   SeoEngineService,
-  IssueFactory
+  IssueFactory,
+  SecurityEngineService,
+  AxeRunnerService,
+  WcagMapperService,
+  HeaderCheckerService,
+  TlsValidatorService,
+  SecurityMapperService,
+  MozObservatoryService,
+  HtmlCheckerService,
+  CssCheckerService
 } from '@weblens/audit-engine';
 import { AuditProcessor } from './audit-processor';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisModule } from './redis/redis.module';
-import { MozObservatoryService } from './ai-service/moz-observatory.service';
 
 @Module({
   imports: [
@@ -45,22 +46,23 @@ import { MozObservatoryService } from './ai-service/moz-observatory.service';
   providers: [
     AppService,
     CrawlerService,
-    AuditLogicService,
     AuditProcessor,
     AiServiceService,
+    AccessibilityEngineService,
+    HtmlAnalysisEngineService,
+    TechDetectorService,
+    SecurityEngineService,
+    PerfEngineService,
+    SeoEngineService,
+    IssueFactory,
     AxeRunnerService,
     WcagMapperService,
     HeaderCheckerService,
     TlsValidatorService,
     SecurityMapperService,
-    HtmlCheckerService,
-    CssCheckerService,
-    HtmlCssMapperService,
-    TechDetectorService,
     MozObservatoryService,
-    PerfEngineService,
-    SeoEngineService,
-    IssueFactory
+    HtmlCheckerService,
+    CssCheckerService
   ],
 })
 export class AppModule {}

@@ -4,24 +4,19 @@ import { Logger } from '@nestjs/common';
 import { CrawlerService } from './crawler/crawler.service';
 import { FallbackLighthouseEngine } from '@weblens/audit-engine';
 import {
-  AuditLogicService,
   ScoringService,
   EngineScore,
-  AxeRunnerService,
-  WcagMapperService,
-  HeaderCheckerService,
-  TlsValidatorService,
-  SecurityMapperService,
-  HtmlCssMapperService,
+  HtmlAnalysisEngineService,
   PerfEngineService,
   SeoEngineService,
   SEO_REFERENCES,
   EngineContext,
+  SecurityEngineService,
+  AccessibilityEngineService
 } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
-import { MozObservatoryService } from './ai-service/moz-observatory.service';
 import { WCAG_REFERENCES } from '../../../packages/audit-engine/src/engines/accessibility/wcag-references';
 import { SECURITY_REFERENCES } from '../../../packages/audit-engine/src/engines/security/security-references';
 import { PERF_REFERENCES } from '../../../packages/audit-engine/src/engines/perf/perf-references';
@@ -56,19 +51,14 @@ export class AuditProcessor extends WorkerHost {
 
   constructor(
     private readonly crawlerService: CrawlerService,
-    private readonly auditLogicService: AuditLogicService,
     private readonly aiService: AiServiceService,
-    private readonly axeRunnerService: AxeRunnerService,
-    private readonly wcagMapperService: WcagMapperService,
-    private readonly headerCheckerService: HeaderCheckerService,
-    private readonly tlsValidatorService: TlsValidatorService,
-    private readonly securityMapperService: SecurityMapperService,
-    private readonly htmlCssMapperService: HtmlCssMapperService,
+    private readonly htmlAnalysisEngineService: HtmlAnalysisEngineService,
     private readonly techDetectorService: TechDetectorService,
     private readonly redisService: RedisService,
-    private readonly mozObservatoryService: MozObservatoryService,
+    private readonly securityEngineService: SecurityEngineService,
     private readonly perfEngineService: PerfEngineService,
     private readonly seoEngineService: SeoEngineService,
+    private readonly accessibilityEngineService: AccessibilityEngineService,
   ) {
     super();
   }
@@ -111,11 +101,20 @@ export class AuditProcessor extends WorkerHost {
 
         this.logger.debug(`[Job ${job.id}] Step 2: Starting analysis...`);
 
-        const comprehensiveAuditData =
-          await this.auditLogicService.performComprehensiveAudit(
-            crawlData,
-            url,
-          );
+        const comprehensiveAuditData = {
+          perfDetails: {},
+          seoScore: 0,
+          seoDetails: {},
+          accScore: 0,
+          accDetails: {},
+          securityScore: 0,
+          securityDetails: {},
+          techStack: {},
+          networkDetails: {},
+          structureDetails: {},
+          jsErrorsDetails: {},
+          uiUxDetails: {}
+        };
 
         const perfAnalysis = this.perfEngineService.analyze(crawlData);
         (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
@@ -139,64 +138,40 @@ export class AuditProcessor extends WorkerHost {
         this.logger.debug(
           `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
         );
-        const accessibilityResults = await this.axeRunnerService.runAxeOnPage(
-          crawlData.page,
-        );
-        const mappedAccessibilityIssues =
-          await this.wcagMapperService.mapAxeToIssues(accessibilityResults);
+        const accessibilityResults = await this.accessibilityEngineService.analyze(crawlData.page);
+        
         (comprehensiveAuditData as any).accessibility =
-          mappedAccessibilityIssues;
+          accessibilityResults.issues;
 
         this.logger.debug(
           `[Job ${job.id}] Step 2.6: Running security audit...`,
         );
-        const headers = (crawlData as any).headers || {};
-        const tlsInfo = (crawlData as any).tlsInfo || null;
 
-        const headerResults =
-          this.headerCheckerService.checkSecurityHeaders(headers);
-        const tlsResults = this.tlsValidatorService.checkTLS(tlsInfo);
+        const securityContext: EngineContext = {
+          crawlData: crawlData as any,
+          url: url,
+          network: (crawlData as any).network,
+          lighthouseData: (crawlData as any).lighthouseData,
+          headers: (crawlData as any).headers,
+        };
 
-        const allSecurityIssues = [...headerResults, ...tlsResults];
-        const securityScoreResult =
-          this.securityMapperService.calculateSecurityScore(allSecurityIssues);
+        const securityResult = await this.securityEngineService.analyze(securityContext);
 
-        (comprehensiveAuditData as any).securityScore =
-          securityScoreResult.score;
-        (comprehensiveAuditData as any).securityIssues = allSecurityIssues;
-
-        this.logger.debug(
-          `[Job ${job.id}] Step 2.6.5: Calling Mozilla Observatory API...`,
-        );
-        try {
-          const hostname = new URL(url).hostname;
-          const mozResult = await this.mozObservatoryService.analyze(hostname);
-          if (mozResult) {
-            (comprehensiveAuditData as any).securityMozillaGrade =
-              mozResult.grade;
-            (comprehensiveAuditData as any).securityMozillaScore =
-              mozResult.score;
-            (comprehensiveAuditData as any).securityMozillaTests = {
-              passed: mozResult.testsPassed || mozResult.tests_failed,
-              failed: mozResult.testsFailed || mozResult.tests_failed,
-            };
-          } else {
-            (comprehensiveAuditData as any).securityMozillaGrade =
-              securityScoreResult.mozillaResult.grade;
-          }
-        } catch (e) {
-          this.logger.warn(
-            `Mozilla Observatory failed for ${url}, using fallback grade`,
-          );
-          (comprehensiveAuditData as any).securityMozillaGrade =
-            securityScoreResult.mozillaResult.grade;
+        (comprehensiveAuditData as any).securityScore = securityResult.score;
+        (comprehensiveAuditData as any).securityIssues = securityResult.issues;
+        (comprehensiveAuditData as any).securityMozillaGrade = securityResult.mozillaGrade;
+        if (securityResult.mozillaScore !== undefined) {
+          (comprehensiveAuditData as any).securityMozillaScore = securityResult.mozillaScore;
+        }
+        if (securityResult.mozillaTests !== undefined) {
+          (comprehensiveAuditData as any).securityMozillaTests = securityResult.mozillaTests;
         }
 
         this.logger.debug(
           `[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`,
         );
         const htmlCssResult =
-          this.htmlCssMapperService.processHtmlCssAudit(crawlData);
+          this.htmlAnalysisEngineService.analyze(crawlData);
 
         (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
         (comprehensiveAuditData as any).htmlIssues =

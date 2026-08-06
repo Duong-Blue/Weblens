@@ -76,6 +76,6 @@ describe('SeoEngineService', () => {
 
     expect(result.score).toBe(0);
     const failedIssues = result.issues.filter(i => i.status === 'fail');
-    expect(failedIssues.length).toBe(9); // 9 rules in total
+    expect(failedIssues.length).toBe(13); // 13 failing rules on an empty page
   });
 });
