@@ -1,11 +1,11 @@
-import { EngineContext } from '../../../shared/engine.types';
+import { EngineContext } from '../../shared/engine.types';
 import { SeoCheckResult, SeoRule } from '../seo-rules';
 import * as cheerio from 'cheerio';
 
 /**
  * Checks if a page is explicitly blocked from indexing via robots meta tags.
  */
-function isBlockedByRobotsMeta($: cheerio.CheerioAPI): boolean {
+function isBlockedByRobotsMeta($: cheerio.CheerioAPI | cheerio.Root): boolean {
   let isBlocked = false;
   $('meta[name="robots"]').each((_, el) => {
     const content = $(el).attr('content')?.toLowerCase() || '';
@@ -14,6 +14,21 @@ function isBlockedByRobotsMeta($: cheerio.CheerioAPI): boolean {
     }
   });
   return isBlocked;
+}
+
+function normalizeCanonicalKey(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    url.hash = '';
+    url.search = '';
+    if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+      url.pathname = url.pathname.slice(0, -1);
+    }
+    return url.href;
+  } catch {
+    return null;
+  }
 }
 
 export const IndexabilityRule: SeoRule = {
@@ -32,7 +47,7 @@ export const IndexabilityRule: SeoRule = {
     const details: string[] = [];
 
     // 1. Check robots meta
-    const isNoIndex = isBlockedByRobotsMeta($);
+    const isNoIndex = isBlockedByRobotsMeta($ as any);
     if (isNoIndex) {
       details.push('Page is blocked by a "noindex" or "none" robots meta tag.');
     }
@@ -43,16 +58,21 @@ export const IndexabilityRule: SeoRule = {
     if (!canonicalHref || !canonicalHref.trim()) {
       details.push('Missing <link rel="canonical"> element.');
     } else {
-      // Basic check for validity - must be an absolute URL
-      if (!/^https?:\/\//i.test(canonicalHref)) {
+      const canonicalKey = normalizeCanonicalKey(canonicalHref);
+      if (!canonicalKey) {
         details.push(`Canonical href is not a valid absolute URL: ${canonicalHref}`);
       } else {
-        hasValidCanonical = true;
+        const pageUrl = ctx.url || ctx.crawlData?.url || '';
+        const pageKey = pageUrl ? normalizeCanonicalKey(pageUrl) : null;
+        if (pageKey !== null && pageKey !== canonicalKey) {
+          details.push(`Canonical points to ${canonicalHref} but the page URL is ${pageUrl}`);
+        } else {
+          hasValidCanonical = true;
+        }
       }
     }
 
     // 3. Robots.txt evaluation
-    // We assume the crawler populates this. If blocked, it's a severe issue.
     const isRobotsTxtBlocked = (ctx.crawlData as any).robotsInfo?.blocked === true;
     if (isRobotsTxtBlocked) {
       details.push('Page is blocked by robots.txt.');
@@ -66,6 +86,11 @@ export const IndexabilityRule: SeoRule = {
         ctx.seoHealth = {};
       }
       ctx.seoHealth.indexability = 'BLOCKED';
+    } else {
+      if (!ctx.seoHealth) {
+        ctx.seoHealth = {};
+      }
+      ctx.seoHealth.indexability = 'OK';
     }
 
     const passed = !isBlocked && hasValidCanonical;
@@ -77,7 +102,7 @@ export const IndexabilityRule: SeoRule = {
         expected: 'Page should be indexable by search engines',
         summary: 'Page is blocked from indexing.',
         details: details.length > 0 ? details : undefined,
-        points: 0, // Force points to 0 when blocked
+        points: 0,
       };
     }
 

@@ -1,5 +1,5 @@
 import { IndexabilityRule } from './indexability.rule';
-import { SeoEngineContext } from '../seo-rules';
+import { EngineContext } from '../../shared/engine.types';
 
 describe('IndexabilityRule', () => {
   it('should pass for a fully indexable page with a canonical tag', () => {
@@ -16,15 +16,15 @@ describe('IndexabilityRule', () => {
             <body></body>
           </html>
         `,
-      },
+      } as any,
       seoHealth: {},
-    } as any;
+    };
 
     const result = IndexabilityRule.evaluate!(ctx);
 
     expect(result.passed).toBe(true);
     expect(result.points).toBe(25);
-    expect(ctx.seoHealth?.indexability).toBeUndefined(); // Or not 'BLOCKED'
+    expect(ctx.seoHealth?.indexability).toBe('OK');
   });
 
   it('should fail and return 0 points if page is blocked by noindex', () => {
@@ -41,9 +41,9 @@ describe('IndexabilityRule', () => {
             <body></body>
           </html>
         `,
-      },
+      } as any,
       seoHealth: {},
-    } as any;
+    };
 
     const result = IndexabilityRule.evaluate!(ctx);
 
@@ -71,7 +71,7 @@ describe('IndexabilityRule', () => {
         },
       } as any,
       seoHealth: {},
-    } as any;
+    };
 
     const result = IndexabilityRule.evaluate!(ctx);
 
@@ -94,15 +94,15 @@ describe('IndexabilityRule', () => {
             <body></body>
           </html>
         `,
-      },
+      } as any,
       seoHealth: {},
-    } as any;
+    };
 
     const result = IndexabilityRule.evaluate!(ctx);
 
     expect(result.passed).toBe(false);
     expect(result.points).toBe(0);
-    expect(ctx.seoHealth?.indexability).not.toBe('BLOCKED'); // Not blocked, just missing canonical
+    expect(ctx.seoHealth?.indexability).toBe('OK'); 
     expect(result.details).toContain('Missing <link rel="canonical"> element.');
   });
 
@@ -119,9 +119,9 @@ describe('IndexabilityRule', () => {
             <body></body>
           </html>
         `,
-      },
+      } as any,
       seoHealth: {},
-    } as any;
+    };
 
     const result = IndexabilityRule.evaluate!(ctx);
 
