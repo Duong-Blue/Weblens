@@ -251,6 +251,39 @@ export class CrawlerService {
       const parsedTiming = JSON.parse(performanceTiming);
 
       const content = await page.content();
+      const parsedTitle = await page.title();
+      const parsedMetaTags = await page.evaluate(() => {
+        const metaTags: Record<string, string> = {};
+        const metaElements = document.querySelectorAll('meta');
+        metaElements.forEach(meta => {
+           const name = meta.getAttribute('name') || meta.getAttribute('property');
+           const content = meta.getAttribute('content');
+           if (name && content) metaTags[name] = content;
+        });
+        return metaTags;
+      });
+
+      const jsonLdBlocks = await page.evaluate(() => {
+        return Array.from(document.querySelectorAll('script[type="application/ld+json"]')).map(script => ({
+          raw: script.innerHTML,
+          parsed: JSON.parse(script.innerHTML),
+          type: 'json-ld',
+          valid: true,
+          errors: []
+        }));
+      });
+
+      const headingHierarchy = await page.evaluate(() => {
+        const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).map((h, index) => ({
+           level: parseInt(h.tagName[1], 10),
+           text: h.textContent?.trim() || '',
+           tagName: h.tagName,
+           orderIndex: index,
+           hasId: h.hasAttribute('id'),
+           id: h.getAttribute('id') || undefined
+        }));
+        return { headings, isValid: true, issues: [], outline: headings.map(h => h.text) };
+      });
 
       // Fetch sitemap.xml relative to target URL
       const sitemapInfo = await this.fetchSitemap(url);
@@ -262,6 +295,10 @@ export class CrawlerService {
 
       const crawlResult = {
         htmlContent: content,
+        parsedTitle,
+        parsedMetaTags,
+        jsonLdBlocks,
+        headingHierarchy,
         networkRequests,
         consoleMessages,
         performanceTiming: parsedTiming,
