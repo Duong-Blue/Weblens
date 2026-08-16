@@ -45,7 +45,7 @@ function detectCdn(headers: any): string | undefined {
 }
 
 
-@Processor('audit-queue', { concurrency: 5, lockDuration: 30000 })
+@Processor('audit-queue', { concurrency: 5, lockDuration: 300000 })
 export class AuditProcessor extends WorkerHost {
   private readonly logger = new Logger(AuditProcessor.name);
 
@@ -132,6 +132,8 @@ export class AuditProcessor extends WorkerHost {
         const seoAnalysis = this.seoEngineService.analyze(seoContext);
         (comprehensiveAuditData as any).seoScore = seoAnalysis.score;
         (comprehensiveAuditData as any).seoIssues = seoAnalysis.issues;
+        (comprehensiveAuditData as any).seoDetails = seoAnalysis.seoDetails || {};
+        (comprehensiveAuditData as any).seoHealth = seoContext.seoHealth || {};
 
         await job.updateProgress({
           auditId,
@@ -426,7 +428,7 @@ export class AuditProcessor extends WorkerHost {
         );
         return { success: false, error: error.message };
       }
-
+      
       throw error;
     }
   }
