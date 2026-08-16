@@ -47,6 +47,7 @@ export interface ReportModel {
   heavyResources?: Array<{ url: string; type: string; size: number }>;
   budgetStatus?: { totalSize: number; limit: number; isOverBudget: boolean };
   seoDetails?: any;
+  seoHealth?: any;
   accessibilityDetails?: {
     wcagPassRate?: number;
     ariaLabels?: { passed: boolean };
@@ -252,6 +253,7 @@ export function buildReportModel(
     tools,
     resourceBreakdown,
     seoDetails: result.seoDetails || undefined,
+    seoHealth: (result as any).seoHealth || undefined,
     securityDetails: result.securityDetails || undefined,
     accWcag,
     crawlData,

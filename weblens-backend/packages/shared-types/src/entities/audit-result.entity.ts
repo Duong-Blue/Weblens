@@ -24,26 +24,27 @@ export interface PerfDetails {
 }
 
 export interface SeoDetails {
-  title: string;
+  title: string | undefined;
   hasTitle: boolean;
   description: string | undefined;
   hasMetaDescription: boolean;
   hasH1: boolean;
   h1Count: number;
   linksCount: number;
-  social?: {
-    openGraph: {
-      title?: string;
-      description?: string;
-      image?: string;
-    };
-    twitter: {
-      card?: string;
-      title?: string;
-      description?: string;
-    };
-    hasJsonLd: boolean;
+  openGraph?: {
+    title?: string;
+    description?: string;
+    image?: string;
   };
+  twitter?: {
+    card?: string;
+    title?: string;
+    description?: string;
+  };
+  hasJsonLd: boolean;
+  robotsTxtExists?: boolean;
+  sitemapExists?: boolean;
+  canonicalExists?: boolean;
 }
 
 export interface WcagCriterion {

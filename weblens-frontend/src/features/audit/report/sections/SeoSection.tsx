@@ -9,12 +9,12 @@ export const SeoSection: React.FC<{ model: ReportModel }> = ({ model }) => {
   const seoImps = improvements.find(i => i.area.toLowerCase().includes('seo'))?.recommendations || [];
 
   const criteriaList = seoDetails ? [
-    { id: 'meta-title', label: 'Meta Title', passed: seoDetails.meta?.hasTitle || false },
-    { id: 'meta-desc', label: 'Meta Description', passed: seoDetails.meta?.hasDescription || false },
-    { id: 'robots-txt', label: 'Robots.txt', passed: seoDetails.robotsTxt?.exists || false },
-    { id: 'sitemap', label: 'Sitemap.xml', passed: seoDetails.sitemap?.exists || false },
-    { id: 'canonical', label: 'Canonical Tag', passed: seoDetails.canonical?.exists || false },
-    { id: 'h1', label: 'H1 Tag (Exactly One)', passed: seoDetails.headings?.h1Count === 1 },
+    { id: 'meta-title', label: 'Meta Title', passed: seoDetails.hasTitle || false },
+    { id: 'meta-desc', label: 'Meta Description', passed: seoDetails.hasMetaDescription || false },
+    { id: 'robots-txt', label: 'Robots.txt', passed: seoDetails.robotsTxtExists || false },
+    { id: 'sitemap', label: 'Sitemap.xml', passed: seoDetails.sitemapExists || false },
+    { id: 'canonical', label: 'Canonical Tag', passed: seoDetails.canonicalExists || false },
+    { id: 'h1', label: 'H1 Tag (Exactly One)', passed: seoDetails.h1Count === 1 },
   ] : [];
 
   return (
@@ -26,7 +26,12 @@ export const SeoSection: React.FC<{ model: ReportModel }> = ({ model }) => {
         </div>
         
         <div className="md:col-span-2">
-          <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Tiêu chí cơ bản</h3>
+          <div className="flex items-center justify-between border-b pb-2 mb-4">
+             <h3 className="text-lg font-semibold text-gray-900">Tiêu chí cơ bản</h3>
+             {model.seoHealth?.indexability === 'BLOCKED' && (
+               <span className="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">BLOCKED (NOINDEX)</span>
+             )}
+          </div>
           {criteriaList.length > 0 ? (
             <CriteriaChecklist items={criteriaList} />
           ) : (
