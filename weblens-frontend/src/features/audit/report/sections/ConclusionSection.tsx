@@ -23,7 +23,7 @@ export function ConclusionSection({ data }: ConclusionSectionProps) {
   const dedupedRecs = Array.from(allRecs).slice(0, 5); // Limit to top 5
 
   return (
-    <ReportSection title="Kết luận & Đánh giá" number="11">
+    <ReportSection title="Kết luận" number={13}>
       <div className="space-y-6">
         <div className={`p-6 rounded-xl border ${status.border} ${status.bg} flex flex-col md:flex-row items-center gap-6`}>
           <div className="flex-shrink-0 text-center">

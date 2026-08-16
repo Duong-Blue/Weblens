@@ -112,5 +112,57 @@
     { "id": "css-1", "ruleId": "invalid-css", "severity": "low", "status": "fail", "title": "Invalid CSS", "description": "Fix invalid props", "category": "css" }
   ],
   "referenceLinks": [],
-  "status": "completed"
+  "status": "completed",
+  "crawlerDiscovery": {
+    "totalScanned": 120,
+    "uniqueInternalLinks": 85,
+    "uniqueExternalLinks": 35,
+    "brokenLinks": [
+      {
+        "url": "https://example.com/broken",
+        "statusCode": 404,
+        "source": "https://example.com/about"
+      }
+    ],
+    "redirects": [
+      {
+        "from": "https://example.com/old",
+        "to": "https://example.com/new",
+        "statusCode": 301
+      }
+    ],
+    "slowPages": [
+      {
+        "url": "https://example.com/slow",
+        "loadTimeMs": 2500
+      }
+    ]
+  },
+  "technologies": [
+    {
+      "name": "React",
+      "category": "JavaScript Frameworks",
+      "confidence": 100,
+      "version": "18.2.0"
+    },
+    {
+      "name": "Tailwind CSS",
+      "category": "UI Frameworks",
+      "confidence": 100,
+      "version": "3.3.0"
+    }
+  ],
+  "sitemapInfo": {
+    "found": true,
+    "url": "https://example.com/sitemap.xml",
+    "totalUrls": 150,
+    "valid": true,
+    "errors": []
+  },
+  "robotsInfo": {
+    "found": true,
+    "valid": true,
+    "content": "User-agent: *\nDisallow: /admin/",
+    "sitemapDirectives": ["https://example.com/sitemap.xml"]
+  }
 }

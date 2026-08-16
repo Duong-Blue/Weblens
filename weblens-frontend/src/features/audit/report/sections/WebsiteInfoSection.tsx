@@ -43,7 +43,7 @@ export const WebsiteInfoSection: React.FC<WebsiteInfoSectionProps> = ({ report, 
   ];
 
   return (
-    <ReportSection title="Thông tin Website" number="3">
+    <ReportSection title="Thông tin website" number={4}>
       <div className="mb-8">
         <KeyValueGrid items={gridItems} />
       </div>

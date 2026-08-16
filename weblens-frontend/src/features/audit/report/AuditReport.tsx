@@ -4,13 +4,16 @@ import { buildReportModel } from './reportModel';
 
 import {
   CoverSection,
-  SummarySection,
+  AiSummarySection,
+  OverallScoreSection,
   WebsiteInfoSection,
+  CrawlerDiscoverySection,
   PerformanceSection,
   SeoSection,
   AccessibilitySection,
   SecuritySection,
   TechnologySection,
+  HtmlCssSection,
   IssueListSection,
   PriorityPlanSection,
   ConclusionSection,
@@ -33,13 +36,16 @@ export function AuditReport({ result, url }: AuditReportProps) {
         <CoverSection report={data} url={url} />
         
         <div className="px-6 py-12 sm:px-12 md:px-16 space-y-16 print:p-0 print:space-y-8">
-          <SummarySection report={data} />
+          <AiSummarySection model={data} />
+          <OverallScoreSection model={data} />
           <WebsiteInfoSection report={data} url={url} auditId={result.id || ''} />
+          <CrawlerDiscoverySection model={data} />
           <PerformanceSection model={data} />
           <SeoSection model={data} />
           <AccessibilitySection model={data} />
           <SecuritySection model={data} />
           <TechnologySection data={data} />
+          <HtmlCssSection model={data} />
           <IssueListSection data={data} />
           <PriorityPlanSection data={data} />
           <ConclusionSection data={data} />

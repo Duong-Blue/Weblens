@@ -13,7 +13,7 @@ export function PriorityPlanSection({ data }: PriorityPlanSectionProps) {
 
   if (plan.length === 0) {
     return (
-      <ReportSection title="Kế hoạch ưu tiên" number={10} pageBreak>
+      <ReportSection title="Kế hoạch ưu tiên" number={12} pageBreak>
         <p className="text-gray-500 italic">Hiện tại không có vấn đề nào cần ưu tiên khắc phục.</p>
       </ReportSection>
     );
@@ -73,7 +73,7 @@ export function PriorityPlanSection({ data }: PriorityPlanSectionProps) {
   const medium = getBucketItems('medium');
 
   return (
-    <ReportSection title="Kế hoạch ưu tiên" number={10} pageBreak>
+    <ReportSection title="Kế hoạch ưu tiên" number={12} pageBreak>
       <div className="space-y-6">
         {renderBucket('critical', critical, 'border-red-200', 'bg-red-50', (
            <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 shadow-sm">

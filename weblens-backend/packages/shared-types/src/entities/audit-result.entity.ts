@@ -164,4 +164,14 @@ export interface AuditResult {
   aiSummary: string | null;
   aiCategoryAnalysis?: Record<string, { analysis: string; fixRecommendations: string[] }>;
   summary: string | null; // Keep for backward compatibility if needed temporarily
+
+  crawlerDiscovery?: any;
+  htmlScore?: number;
+  cssScore?: number;
+  htmlIssues?: any;
+  cssIssues?: any;
+  technologies?: any;
+  overallScore?: number;
+  scoreLabel?: string;
+  scoreColor?: string;
 }

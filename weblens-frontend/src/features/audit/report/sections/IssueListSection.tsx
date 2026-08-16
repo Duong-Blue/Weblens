@@ -12,7 +12,7 @@ export function IssueListSection({ data }: IssueListSectionProps) {
   
   if (issues.length === 0) {
     return (
-      <ReportSection title="Danh sách vấn đề" number={9} pageBreak>
+      <ReportSection title="Danh sách vấn đề" number={11} pageBreak>
         <p className="text-gray-500 italic">Không phát hiện vấn đề nào cần xử lý chi tiết.</p>
       </ReportSection>
     );
@@ -39,7 +39,7 @@ export function IssueListSection({ data }: IssueListSectionProps) {
   };
 
   return (
-    <ReportSection title="Danh sách vấn đề" number={9} pageBreak>
+    <ReportSection title="Danh sách vấn đề" number={11} pageBreak>
       <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">

@@ -55,6 +55,9 @@ export interface ReportModel {
   };
   securityDetails?: any;
   accWcag: any[];
+  crawlData?: any;
+  htmlDetails?: any;
+  cssDetails?: any;
 }
 
 export function buildReportModel(
@@ -224,6 +227,10 @@ export function buildReportModel(
   }
 
   const accWcag = result.accDetails?.wcag || [];
+  
+  const crawlData = (result as any).crawlData || undefined;
+  const htmlDetails = (result as any).htmlDetails || undefined;
+  const cssDetails = (result as any).cssDetails || undefined;
 
   return {
     overallScore,
@@ -247,5 +254,8 @@ export function buildReportModel(
     seoDetails: result.seoDetails || undefined,
     securityDetails: result.securityDetails || undefined,
     accWcag,
+    crawlData,
+    htmlDetails,
+    cssDetails,
   };
 }

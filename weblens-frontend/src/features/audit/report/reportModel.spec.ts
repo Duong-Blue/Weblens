@@ -45,6 +45,9 @@ describe('reportModel', () => {
       uiUxDetails: null,
       aiSummary: null,
       summary: null,
+      crawlData: null,
+      htmlDetails: null,
+      cssDetails: null,
     };
     const model = buildReportModel(nullResult as AuditResult, {});
     expect(model.overallScore).toBe(0);
@@ -54,6 +57,9 @@ describe('reportModel', () => {
     expect(model.priorityPlan).toEqual([]);
     expect(model.improvements).toEqual([]);
     expect(model.tools).toEqual([]);
+    expect(model.crawlData).toBeUndefined();
+    expect(model.htmlDetails).toBeUndefined();
+    expect(model.cssDetails).toBeUndefined();
   });
 
   it('calculates average overall and best practices scores safely', () => {
@@ -170,5 +176,19 @@ describe('reportModel', () => {
       const model = buildReportModel(result as any, {});
       expect(model.tools).toHaveLength(2);
       expect(model.tools[0].name).toBe('React');
+  });
+
+  it('exposes additional details when provided', () => {
+      const result = {
+          ...baseResult,
+          crawlData: { pages: 10 },
+          htmlDetails: { valid: true },
+          cssDetails: { valid: false }
+      };
+
+      const model = buildReportModel(result as any, {});
+      expect(model.crawlData).toEqual({ pages: 10 });
+      expect(model.htmlDetails).toEqual({ valid: true });
+      expect(model.cssDetails).toEqual({ valid: false });
   });
 });

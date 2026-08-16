@@ -22,24 +22,25 @@ test.describe('Audit Report PDF Export', () => {
     });
   });
 
-  test('report renders 12 sections', async ({ page }) => {
+  test('report renders 13 sections', async ({ page }) => {
     await page.goto('/report/fixture-1');
 
     // Wait for the report cover to be visible
     await expect(page.locator('text=BÁO CÁO KIỂM TRA WEBSITE')).toBeVisible({ timeout: 10000 });
 
     const expectedHeadings = [
-      '2. Tóm tắt',
-      '3. Thông tin website',
-      '4. Hiệu năng',
-      '5. SEO',
-      '6. Accessibility',
-      '7. Bảo mật',
-      '8. Công nghệ',
-      '9. Danh sách vấn đề',
-      '10. Kế hoạch ưu tiên',
-      '11. Kết luận',
-      '12. Phụ lục'
+      '2. Crawler & Discovery',
+      '3. Tóm tắt',
+      '4. Thông tin website',
+      '5. Hiệu năng',
+      '6. SEO',
+      '7. Accessibility',
+      '8. Bảo mật',
+      '9. Công nghệ',
+      '10. Danh sách vấn đề',
+      '11. Kế hoạch ưu tiên',
+      '12. Kết luận',
+      '13. Phụ lục'
     ];
 
     for (const heading of expectedHeadings) {
@@ -51,8 +52,8 @@ test.describe('Audit Report PDF Export', () => {
     await page.goto('/report/fixture-1');
     await expect(page.locator('text=BÁO CÁO KIỂM TRA WEBSITE')).toBeVisible();
 
-    const sectionsWithBreak = [2, 4, 5, 6, 7, 9, 10];
-    const sectionsWithoutBreak = [3, 8];
+    const sectionsWithBreak = [3, 5, 6, 7, 8, 10, 11, 12];
+    const sectionsWithoutBreak = [4, 9];
 
     for (const sectionNumber of sectionsWithBreak) {
       const section = page.locator(`[data-report-section="${sectionNumber}"]`);
@@ -72,7 +73,7 @@ test.describe('Audit Report PDF Export', () => {
     // Emulate print media
     await page.emulateMedia({ media: 'print' });
 
-    const section4 = page.locator(`[data-report-section="4"]`);
+    const section4 = page.locator(`[data-report-section="5"]`);
     const breakBefore = await section4.evaluate((el) => {
       const style = window.getComputedStyle(el);
       return style.breakBefore || style.pageBreakBefore;

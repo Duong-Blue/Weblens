@@ -8,7 +8,7 @@ interface AppendixSectionProps {
 
 export function AppendixSection({ data }: AppendixSectionProps) {
   return (
-    <ReportSection title="Phụ lục & Nguồn" number="12">
+    <ReportSection title="Phụ lục" number={14}>
       <div className="space-y-6 text-sm text-gray-600">
         <div>
           <h3 className="font-bold text-gray-900 mb-2">Công cụ phân tích sử dụng</h3>

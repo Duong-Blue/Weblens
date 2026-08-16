@@ -84,22 +84,26 @@ export class AuditProcessor extends WorkerHost {
       });
 
       const crawlData = await this.crawlerService.crawl(url);
+      
+      this.logger.debug(`[Job ${job.id}] Step 2: Running Fallback Lighthouse (if needed)...`);
       if (!crawlData.lighthouseData) {
-        crawlData.lighthouseData =
-          await FallbackLighthouseEngine.compute(crawlData);
+        crawlData.lighthouseData = await FallbackLighthouseEngine.compute(crawlData);
       }
-      try {
-        this.logger.debug(
-          `[Job ${job.id}] Step 1 Complete: Crawling finished successfully`,
-        );
-        await job.updateProgress({
-          auditId,
-          step: 'crawled',
-          progress: 40,
-          data: null,
-        });
+      
+      await job.updateProgress({
+        auditId,
+        step: 'lighthouse',
+        progress: 20,
+        data: null,
+      });
 
-        this.logger.debug(`[Job ${job.id}] Step 2: Starting analysis...`);
+      try {
+        this.logger.debug(`[Job ${job.id}] Step 3: Starting analysis...`);
+
+        const crawlerDiscovery = {
+          sitemap: (crawlData as any).sitemapInfo,
+          robots: (crawlData as any).robotsInfo
+        };
 
         const comprehensiveAuditData = {
           perfDetails: {},
@@ -113,17 +117,11 @@ export class AuditProcessor extends WorkerHost {
           networkDetails: {},
           structureDetails: {},
           jsErrorsDetails: {},
-          uiUxDetails: {}
+          uiUxDetails: {},
+          crawlerDiscovery
         };
 
-        const perfAnalysis = this.perfEngineService.analyze(crawlData);
-        (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
-        (comprehensiveAuditData as any).performanceIssues = [
-          ...((comprehensiveAuditData as any).performanceIssues || []),
-          ...perfAnalysis.issues,
-        ];
-
-        this.logger.debug(`[Job ${job.id}] Step 2.4: Running SEO analysis...`);
+        this.logger.debug(`[Job ${job.id}] Step 3.1: Running SEO analysis...`);
         const seoContext: EngineContext = {
           crawlData: crawlData as any,
           url: url,
@@ -135,18 +133,40 @@ export class AuditProcessor extends WorkerHost {
         (comprehensiveAuditData as any).seoScore = seoAnalysis.score;
         (comprehensiveAuditData as any).seoIssues = seoAnalysis.issues;
 
-        this.logger.debug(
-          `[Job ${job.id}] Step 2.5: Running accessibility audit...`,
-        );
+        await job.updateProgress({
+          auditId,
+          step: 'seo_analyzed',
+          progress: 30,
+          data: null,
+        });
+
+        this.logger.debug(`[Job ${job.id}] Step 3.2: Running Performance analysis...`);
+        const perfAnalysis = this.perfEngineService.analyze(crawlData);
+        (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
+        (comprehensiveAuditData as any).performanceIssues = [
+          ...((comprehensiveAuditData as any).performanceIssues || []),
+          ...perfAnalysis.issues,
+        ];
+
+        await job.updateProgress({
+          auditId,
+          step: 'performance_analyzed',
+          progress: 40,
+          data: null,
+        });
+
+        this.logger.debug(`[Job ${job.id}] Step 3.3: Running Accessibility audit...`);
         const accessibilityResults = await this.accessibilityEngineService.analyze(crawlData.page);
-        
-        (comprehensiveAuditData as any).accessibility =
-          accessibilityResults.issues;
+        (comprehensiveAuditData as any).accessibility = accessibilityResults.issues;
 
-        this.logger.debug(
-          `[Job ${job.id}] Step 2.6: Running security audit...`,
-        );
+        await job.updateProgress({
+          auditId,
+          step: 'accessibility_analyzed',
+          progress: 50,
+          data: null,
+        });
 
+        this.logger.debug(`[Job ${job.id}] Step 3.4: Running Security audit...`);
         const securityContext: EngineContext = {
           crawlData: crawlData as any,
           url: url,
@@ -154,9 +174,7 @@ export class AuditProcessor extends WorkerHost {
           lighthouseData: (crawlData as any).lighthouseData,
           headers: (crawlData as any).headers,
         };
-
         const securityResult = await this.securityEngineService.analyze(securityContext);
-
         (comprehensiveAuditData as any).securityScore = securityResult.score;
         (comprehensiveAuditData as any).securityIssues = securityResult.issues;
         (comprehensiveAuditData as any).securityMozillaGrade = securityResult.mozillaGrade;
@@ -167,32 +185,42 @@ export class AuditProcessor extends WorkerHost {
           (comprehensiveAuditData as any).securityMozillaTests = securityResult.mozillaTests;
         }
 
-        this.logger.debug(
-          `[Job ${job.id}] Step 2.7: Running HTML/CSS audit...`,
-        );
-        const htmlCssResult =
-          this.htmlAnalysisEngineService.analyze(crawlData);
+        await job.updateProgress({
+          auditId,
+          step: 'security_analyzed',
+          progress: 60,
+          data: null,
+        });
 
+        this.logger.debug(`[Job ${job.id}] Step 3.5: Running HTML/CSS audit...`);
+        const htmlCssResult = this.htmlAnalysisEngineService.analyze(crawlData);
         (comprehensiveAuditData as any).htmlScore = htmlCssResult.htmlScore;
-        (comprehensiveAuditData as any).htmlIssues =
-          htmlCssResult.issues.filter((i) => i.id.startsWith('HTML-'));
+        (comprehensiveAuditData as any).htmlIssues = htmlCssResult.issues.filter((i) => i.id.startsWith('HTML-'));
         (comprehensiveAuditData as any).cssScore = htmlCssResult.cssScore;
-        (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter(
-          (i) => i.id.startsWith('CSS-'),
-        );
+        (comprehensiveAuditData as any).cssIssues = htmlCssResult.issues.filter((i) => i.id.startsWith('CSS-'));
 
-        this.logger.debug(
-          `[Job ${job.id}] Step 2.7.5: Detecting technology stack...`,
-        );
+        await job.updateProgress({
+          auditId,
+          step: 'html_css_analyzed',
+          progress: 70,
+          data: null,
+        });
+
+        this.logger.debug(`[Job ${job.id}] Step 3.6: Detecting Technology Stack...`);
         const technologies = this.techDetectorService.detect(
           (crawlData as any).htmlContent,
           (crawlData as any).headers || {},
         );
         (comprehensiveAuditData as any).technologies = technologies;
 
-        this.logger.debug(
-          `[Job ${job.id}] Step 2.8: Calculating Final Scores...`,
-        );
+        await job.updateProgress({
+          auditId,
+          step: 'tech_stack_analyzed',
+          progress: 75,
+          data: null,
+        });
+
+        this.logger.debug(`[Job ${job.id}] Step 3.7: Calculating Final Scores...`);
 
         const engineScores: EngineScore[] = [];
 
@@ -308,26 +336,26 @@ export class AuditProcessor extends WorkerHost {
         }
 
         this.logger.debug(
-          `[Job ${job.id}] Step 2 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`,
+          `[Job ${job.id}] Step 3 Complete: Analysis finished successfully (Score: ${overallResult.overallScore})`,
         );
         await job.updateProgress({
           auditId,
-          step: 'analyzed',
-          progress: 70,
+          step: 'scoring_completed',
+          progress: 80,
           data: comprehensiveAuditData,
         });
 
-        this.logger.debug(`[Job ${job.id}] Step 3: Generating AI Summary...`);
+        this.logger.debug(`[Job ${job.id}] Step 4: Generating AI Summary...`);
         const aiSummary = await this.aiService.generateSummary({
           url,
           ...comprehensiveAuditData,
         });
         this.logger.debug(
-          `[Job ${job.id}] Step 3 Complete: AI Summary generated`,
+          `[Job ${job.id}] Step 4 Complete: AI Summary generated`,
         );
         await job.updateProgress({
           auditId,
-          step: 'summarized',
+          step: 'ai_summarized',
           progress: 90,
           data: { aiSummary: JSON.stringify(aiSummary) },
         });
@@ -359,7 +387,7 @@ export class AuditProcessor extends WorkerHost {
               : JSON.stringify(aiSummary),
         };
 
-        this.logger.debug(`[Job ${job.id}] Step 4: Saving results to Redis...`);
+        this.logger.debug(`[Job ${job.id}] Step 5: Saving results to Redis...`);
         await this.redisService.setAuditResult(auditId, resultData);
 
         this.logger.log(

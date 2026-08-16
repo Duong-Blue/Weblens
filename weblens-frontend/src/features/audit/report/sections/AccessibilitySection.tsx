@@ -9,7 +9,7 @@ export const AccessibilitySection: React.FC<{ model: ReportModel }> = ({ model }
   const a11yImps = improvements.find(i => i.area.toLowerCase().includes('accessibility'))?.recommendations || [];
 
   return (
-    <ReportSection title="Accessibility" number={6} pageBreak>
+    <ReportSection title="Accessibility" number={7} pageBreak>
       <div className="flex flex-col md:flex-row gap-8 mb-8">
         <div className="flex flex-col items-center justify-center space-y-4 w-full md:w-1/3">
           <ScoreGauge score={categoryScores.accessibility} size={120} strokeWidth={8} />

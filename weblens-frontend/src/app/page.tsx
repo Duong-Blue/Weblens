@@ -6,6 +6,7 @@ import { useSocket } from "@/features/audit/hooks/useSocket";
 import { TechStackSection } from "@/features/audit/components/TechStackSection";
 import { AiSummarySection } from "@/features/audit/components/AiSummarySection";
 import { MetricBlock } from "@/features/audit/components/MetricBlock";
+import { CrawlerDiscoveryCard } from "@/features/audit/components/CrawlerDiscoveryCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -43,14 +44,12 @@ export default function Home() {
         
         setLiveStatus(step);
 
-        if (step === 'analyzed') {
+        if (step === 'scoring_completed' || step === 'analyzed') {
           setLiveData((prev: LiveDataType | null) => ({ ...prev, ...data }));
-          setLiveStatus('analyzed');
         }
 
-        if (step === 'summarized') {
+        if (step === 'ai_summarized' || step === 'summarized') {
           setLiveData((prev: LiveDataType | null) => ({ ...prev, aiSummary: data?.aiSummary }));
-          setLiveStatus('summarized');
         }
 
         if (step === 'completed' && !auditData) {
@@ -78,7 +77,7 @@ export default function Home() {
 
   const status = liveStatus || (auditData as any)?.data?.audit?.status || (auditData as any)?.audit?.status;
   const result = liveData || (auditData as any)?.data?.result || (auditData as any)?.result;
-  const isAuditRunning = status === 'pending' || status === 'processing' || status === 'crawling';
+  const isAuditRunning = status !== 'completed' && status !== 'failed' && !isCreateError && status !== '' && status !== undefined;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +100,7 @@ export default function Home() {
 
     setActiveAuditId(null);
     setLiveData(null);
-    setLiveStatus("");
+    setLiveStatus("pending");
 
     createAudit({ url: submitUrl, anonymous: true })
       .unwrap()
@@ -112,16 +111,33 @@ export default function Home() {
         
         if (finalAuditId) {
           setActiveAuditId(finalAuditId);
-          setLiveStatus('pending');
         } else {
           setUrlError("Không thể lấy ID báo cáo. Vui lòng thử lại.");
+          setLiveStatus("");
         }
       })
       .catch((err) => {
         console.error('Error creating audit:', err);
         setUrlError("Có lỗi xảy ra khi tạo báo cáo. Vui lòng thử lại.");
+        setLiveStatus("");
       });
   };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'crawling': return 'Bước 1: Đang thu thập dữ liệu website...';
+      case 'lighthouse': return 'Bước 2: Đang chạy phân tích Fallback Lighthouse...';
+      case 'seo_analyzed': return 'Bước 3: Đang đánh giá chuẩn SEO...';
+      case 'performance_analyzed': return 'Bước 4: Đang đo lường hiệu suất...';
+      case 'accessibility_analyzed': return 'Bước 5: Đang kiểm tra khả năng truy cập...';
+      case 'security_analyzed': return 'Bước 6: Đang rà soát bảo mật...';
+      case 'html_css_analyzed': return 'Bước 7: Đang phân tích cấu trúc HTML/CSS...';
+      case 'tech_stack_analyzed': return 'Bước 8: Đang nhận diện công nghệ...';
+      case 'scoring_completed': return 'Bước 9: Đang tổng hợp điểm số...';
+      case 'ai_summarized': return 'Bước 10: AI đang viết tóm tắt...';
+      default: return 'Đang chuẩn bị đánh giá...';
+    }
+  }
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans min-h-screen relative overflow-hidden">
@@ -191,7 +207,7 @@ export default function Home() {
                 <div className="flex items-center gap-4 text-blue-700 mb-6 bg-blue-50/80 p-5 rounded-2xl border border-blue-100/60 shadow-sm backdrop-blur-sm">
                   <div className="w-7 h-7 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
                   <span className="font-semibold text-lg">
-                    {status === 'crawling' ? 'Bước 1: Đang thu thập dữ liệu website...' : 'Đang chuẩn bị đánh giá...'}
+                    {getStatusText(status)}
                   </span>
                 </div>
 
@@ -249,40 +265,11 @@ export default function Home() {
 
             {result && (
               <div className="p-10 sm:p-14 space-y-16">
+                <CrawlerDiscoveryCard crawlData={result.crawlerDiscovery} />
                 <TechStackSection techStack={result.techStack} />
                 
                 <section>
                   <h3 className="text-xl font-semibold text-zinc-900 mb-8">Detailed Analysis</h3>
-                  
-                  <MetricBlock 
-                    title="Performance" 
-                    score={result.perfScore ?? 0} 
-                    details={
-                      <ul className="space-y-4 text-sm">
-                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
-                          <span className="text-zinc-500 font-medium">Load Time</span>
-                          <span className="font-bold text-zinc-900">{result.perfDetails?.loadTimeMs || 0} ms</span>
-                        </li>
-                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
-                          <span className="text-zinc-500 font-medium">Heavy Resources</span>
-                          <span className="font-bold text-zinc-900">{result.perfDetails?.heavyResources || 0} files</span>
-                        </li>
-                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
-                          <span className="text-zinc-500 font-medium">Total Requests</span>
-                          <span className="font-bold text-zinc-900">{result.networkDetails?.totalRequests || 0}</span>
-                        </li>
-                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
-                          <span className="text-zinc-500 font-medium">JS Errors</span>
-                          <span className={`font-bold px-2 py-0.5 rounded ${(result.jsErrorsDetails?.errorCount ?? 0) > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                            {result.jsErrorsDetails?.errorCount || 0}
-                          </span>
-                        </li>
-                      </ul>
-                    }
-                    analysis={result.aiCategoryAnalysis?.performance?.analysis}
-                    fixSteps={result.aiCategoryAnalysis?.performance?.fixRecommendations}
-                    links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'performance')} 
-                  />
 
                   <MetricBlock 
                     title="SEO" 
@@ -316,6 +303,36 @@ export default function Home() {
                     analysis={result.aiCategoryAnalysis?.seo?.analysis}
                     fixSteps={result.aiCategoryAnalysis?.seo?.fixRecommendations}
                     links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'seo')} 
+                  />
+                  
+                  <MetricBlock 
+                    title="Performance" 
+                    score={result.perfScore ?? 0} 
+                    details={
+                      <ul className="space-y-4 text-sm">
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Load Time</span>
+                          <span className="font-bold text-zinc-900">{result.perfDetails?.loadTimeMs || 0} ms</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Heavy Resources</span>
+                          <span className="font-bold text-zinc-900">{result.perfDetails?.heavyResources || 0} files</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">Total Requests</span>
+                          <span className="font-bold text-zinc-900">{result.networkDetails?.totalRequests || 0}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">JS Errors</span>
+                          <span className={`font-bold px-2 py-0.5 rounded ${(result.jsErrorsDetails?.errorCount ?? 0) > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {result.jsErrorsDetails?.errorCount || 0}
+                          </span>
+                        </li>
+                      </ul>
+                    }
+                    analysis={result.aiCategoryAnalysis?.performance?.analysis}
+                    fixSteps={result.aiCategoryAnalysis?.performance?.fixRecommendations}
+                    links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'performance')} 
                   />
 
                   <MetricBlock 
@@ -363,10 +380,56 @@ export default function Home() {
                     fixSteps={result.aiCategoryAnalysis?.security?.fixRecommendations}
                     links={result.referenceLinks?.filter((l: { category: string }) => l.category === 'security')} 
                   />
+
+                  <MetricBlock 
+                    title="HTML/CSS" 
+                    score={result.htmlScore ?? 0} 
+                    details={
+                      <ul className="space-y-4 text-sm">
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">HTML Score</span>
+                          <span className="font-bold text-zinc-900">{result.htmlScore ?? 'N/A'}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">CSS Score</span>
+                          <span className="font-bold text-zinc-900">{result.cssScore ?? 'N/A'}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">HTML Issues</span>
+                          <span className="font-bold text-zinc-900">{result.htmlIssues?.length ?? 0}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                          <span className="text-zinc-500 font-medium">CSS Issues</span>
+                          <span className="font-bold text-zinc-900">{result.cssIssues?.length ?? 0}</span>
+                        </li>
+                      </ul>
+                    }
+                  />
+
+                  {result.overallScore !== undefined && (
+                    <MetricBlock 
+                      title="Overall Score" 
+                      score={result.overallScore} 
+                      details={
+                        <ul className="space-y-4 text-sm">
+                          <li className="flex justify-between items-center py-1 border-b border-zinc-200/50 last:border-0">
+                            <span className="text-zinc-500 font-medium">Grade</span>
+                            <span className={`font-bold px-3 py-1 rounded-full text-white ${
+                              result.scoreColor === 'green' ? 'bg-emerald-500' :
+                              result.scoreColor === 'orange' ? 'bg-amber-500' :
+                              result.scoreColor === 'red' ? 'bg-rose-500' : 'bg-zinc-500'
+                            }`}>
+                              {result.scoreLabel || 'N/A'}
+                            </span>
+                          </li>
+                        </ul>
+                      }
+                    />
+                  )}
                 </section>
 
                 <AiSummarySection aiSummary={result.aiSummary} />
-                {(!result.aiSummary && liveStatus === 'analyzed') && (
+                {(!result.aiSummary && (liveStatus === 'scoring_completed' || liveStatus === 'analyzed')) && (
                   <div className="flex items-center justify-center p-8 mt-4 bg-zinc-50 rounded-2xl border border-zinc-200/50 shadow-sm animate-pulse">
                     <div className="flex items-center gap-3 text-zinc-500">
                       <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin"></div>

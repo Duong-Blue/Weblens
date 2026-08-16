@@ -17,7 +17,7 @@ export const PerformanceSection: React.FC<{ model: ReportModel }> = ({ model }) 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
   return (
-    <ReportSection title="Hiệu năng" number={4} pageBreak>
+    <ReportSection title="Hiệu năng" number={5} pageBreak>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="flex flex-col items-center justify-center space-y-4">
           <ScoreGauge score={categoryScores.performance} size={120} strokeWidth={8} />

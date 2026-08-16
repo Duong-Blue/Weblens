@@ -18,7 +18,7 @@ export const SeoSection: React.FC<{ model: ReportModel }> = ({ model }) => {
   ] : [];
 
   return (
-    <ReportSection title="SEO" number={5} pageBreak>
+    <ReportSection title="SEO" number={6} pageBreak>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         <div className="flex flex-col items-center justify-center space-y-4">
           <ScoreGauge score={categoryScores.seo} size={120} strokeWidth={8} />

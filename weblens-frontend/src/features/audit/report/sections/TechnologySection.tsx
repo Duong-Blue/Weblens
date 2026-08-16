@@ -12,7 +12,7 @@ export function TechnologySection({ data }: TechnologySectionProps) {
   
   if (tools.length === 0) {
     return (
-      <ReportSection title="8. Công nghệ & Nền tảng" number="8">
+      <ReportSection title="Công nghệ" number={9}>
         <p className="text-gray-500 italic">Không phát hiện được công nghệ nào cụ thể.</p>
       </ReportSection>
     );
@@ -41,7 +41,7 @@ export function TechnologySection({ data }: TechnologySectionProps) {
   });
 
   return (
-    <ReportSection title="8. Công nghệ & Nền tảng" number="8">
+    <ReportSection title="Công nghệ" number={9}>
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Object.entries(grouped).map(([category, items]) => (

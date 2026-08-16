@@ -9,7 +9,7 @@ export const SecuritySection: React.FC<{ model: ReportModel }> = ({ model }) => 
   const secImps = improvements.find(i => i.area.toLowerCase().includes('security'))?.recommendations || [];
 
   return (
-    <ReportSection title="Bảo mật" number={7} pageBreak>
+    <ReportSection title="Bảo mật" number={8} pageBreak>
       <div className="flex flex-col md:flex-row gap-8 mb-8">
         <div className="flex flex-col items-center justify-center space-y-4 w-full md:w-1/3">
           <ScoreGauge score={categoryScores.security} size={120} strokeWidth={8} />
