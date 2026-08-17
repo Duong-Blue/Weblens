@@ -12,14 +12,14 @@ import {
   SEO_REFERENCES,
   EngineContext,
   SecurityEngineService,
-  AccessibilityEngineService
+  AccessibilityEngineService,
+  WCAG_REFERENCES,
+  SECURITY_REFERENCES,
+  PERF_REFERENCES
 } from '@weblens/audit-engine';
 import { AiServiceService } from './ai-service/ai-service.service';
 import { TechDetectorService } from '@weblens/tech-detector';
 import { RedisService } from './redis/redis.service';
-import { WCAG_REFERENCES } from '../../../packages/audit-engine/src/engines/accessibility/wcag-references';
-import { SECURITY_REFERENCES } from '../../../packages/audit-engine/src/engines/security/security-references';
-import { PERF_REFERENCES } from '../../../packages/audit-engine/src/engines/perf/perf-references';
 import { ReferenceLink, AuditResult } from '@weblens/shared-types';
 
 function detectCdn(headers: any): string | undefined {
@@ -143,12 +143,37 @@ export class AuditProcessor extends WorkerHost {
         });
 
         this.logger.debug(`[Job ${job.id}] Step 3.2: Running Performance analysis...`);
-        const perfAnalysis = this.perfEngineService.analyze(crawlData);
-        (comprehensiveAuditData as any).perfScore = perfAnalysis.perfScore;
-        (comprehensiveAuditData as any).performanceIssues = [
-          ...((comprehensiveAuditData as any).performanceIssues || []),
-          ...perfAnalysis.issues,
-        ];
+        const auditInput = { ...crawlData };
+        delete (auditInput as any).page;
+        delete (auditInput as any).browser;
+
+        const perfAnalysis = this.perfEngineService.analyze(auditInput);
+        
+        const perfDetailsBudget = perfAnalysis.diagnostics?.budgets ? perfAnalysis.diagnostics.budgets.map((b: any) => ({
+          resourceType: b.resourceType,
+          budget: b.budget,
+          actual: b.actual,
+          status: b.status
+        })) : [];
+
+        (comprehensiveAuditData as any).perfDetails = {
+          loadTimeMs: perfAnalysis.metrics?.loadEventMs ?? undefined,
+          coreWebVitals: {
+            lcp: perfAnalysis.metrics?.lcpMs,
+            cls: perfAnalysis.metrics?.cls,
+            inp: perfAnalysis.metrics?.inpMs,
+            fcp: perfAnalysis.metrics?.fcpMs,
+            ttfb: perfAnalysis.metrics?.ttfbMs,
+            tbt: perfAnalysis.metrics?.syntheticTbtMs,
+            tbtSynthetic: perfAnalysis.metrics?.syntheticTbtMs !== undefined ? true : undefined,
+          },
+          heavyResources: perfAnalysis.diagnostics?.assessments?.['heavy-resources']?.value ?? 0,
+          budget: perfDetailsBudget
+        };
+
+        (comprehensiveAuditData as any).perfScore = perfAnalysis.scoreAvailable ? perfAnalysis.perfScore : null;
+        (comprehensiveAuditData as any).performanceIssues = perfAnalysis.issues;
+        (comprehensiveAuditData as any).performanceOpportunities = perfAnalysis.opportunities;
 
         await job.updateProgress({
           auditId,
@@ -260,7 +285,7 @@ export class AuditProcessor extends WorkerHost {
         if ((comprehensiveAuditData as any).accessibility) {
           for (const issue of (comprehensiveAuditData as any).accessibility) {
             const match = Object.entries(WCAG_REFERENCES).find(
-              ([key]) => issue.id && issue.id.includes(key),
+              ([key]) => issue.id && (issue.id + (issue.ruleId ?? '')).toLowerCase().includes(key)
             );
             if (match && (match as any[]).length > 1 && (match as any[])[1]) {
               const m = (match as any)[1];
@@ -280,7 +305,7 @@ export class AuditProcessor extends WorkerHost {
         if ((comprehensiveAuditData as any).securityIssues) {
           for (const issue of (comprehensiveAuditData as any).securityIssues) {
             const match = Object.entries(SECURITY_REFERENCES).find(
-              ([key]) => issue.id && issue.id.includes(key),
+              ([key]) => issue.id && (issue.id + (issue.ruleId ?? '')).toLowerCase().includes(key)
             );
             if (match && (match as any[]).length > 1 && (match as any[])[1]) {
               const m = (match as any)[1];
@@ -298,10 +323,9 @@ export class AuditProcessor extends WorkerHost {
 
         // Perf Links
         if ((comprehensiveAuditData as any).performanceIssues) {
-          for (const issue of (comprehensiveAuditData as any)
-            .performanceIssues) {
+          for (const issue of (comprehensiveAuditData as any).performanceIssues) {
             const match = Object.entries(PERF_REFERENCES).find(
-              ([key]) => issue.id && issue.id.includes(key),
+              ([key]) => issue.id && (issue.id + (issue.ruleId ?? '')).toLowerCase().includes(key)
             );
             if (match && (match as any[]).length > 1 && (match as any[])[1]) {
               const m = (match as any)[1];
@@ -321,7 +345,7 @@ export class AuditProcessor extends WorkerHost {
         if ((comprehensiveAuditData as any).seoIssues) {
           for (const issue of (comprehensiveAuditData as any).seoIssues) {
             const match = Object.entries(SEO_REFERENCES).find(
-              ([key]) => issue.id && issue.id.includes(key),
+              ([key]) => issue.id && (issue.id + (issue.ruleId ?? '')).toLowerCase().includes(key)
             );
             if (match && (match as any[]).length > 1 && (match as any[])[1]) {
               const m = (match as any)[1];

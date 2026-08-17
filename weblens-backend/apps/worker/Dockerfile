@@ -15,4 +15,4 @@ COPY --from=builder /app/packages ./packages
 
 
 
-CMD ["node", "dist/apps/worker/src/main"]
+CMD ["node", "dist/main"]

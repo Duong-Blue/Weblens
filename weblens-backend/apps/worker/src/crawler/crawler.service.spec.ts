@@ -23,8 +23,28 @@ jest.mock('playwright', () => {
         pageGotoResolver = () => resolve({ headers: () => ({}) });
       });
     }),
-    evaluate: jest.fn().mockResolvedValue('{}'),
+    evaluate: jest.fn().mockImplementation((fn) => {
+      const code = fn.toString();
+      if (code.includes('__cwv')) {
+        return JSON.stringify({
+          __cwv: { lcp: 100, inp: 50, cls: 0.1, inpSource: 'event', lcpFinalizedAtRead: true },
+          __perfExt: { fcp: 50, longTasks: [{ startTime: 100, duration: 60 }], inpEvents: [], interactionCount: 1 }
+        });
+      }
+      if (code.includes('navigation')) {
+        return JSON.stringify({ ttfb: 100, domContentLoaded: 200, loadEvent: 300, transferSize: 1000, protocol: 'h2', serverTiming: [] });
+      }
+      if (code.includes('renderBlocking')) {
+        return JSON.stringify({ scripts: ['script.js'], stylesheets: ['style.css'] });
+      }
+      if (code.includes('application/ld+json')) return [];
+      if (code.includes('h1,h2')) return { headings: [], isValid: true, issues: [], outline: [] };
+      if (code.includes('window.performance.timing')) return '{}';
+      if (code.includes('document.querySelectorAll(\'meta\')')) return {};
+      return '{}';
+    }),
     content: jest.fn().mockResolvedValue('<html></html>'),
+    title: jest.fn().mockResolvedValue('Test Title'),
     waitForTimeout: jest.fn().mockResolvedValue(undefined),
   };
   const mBrowser = {

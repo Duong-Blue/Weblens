@@ -29,7 +29,8 @@ interface RobotsInfo {
 export const MAX_SCROLLS = 20;
 export const MAX_SCROLL_TIME_MS = 15000;
 export const CWV_SCRIPT = `
-window.__cwv = { lcp: undefined, inp: undefined, cls: 0 };
+window.__cwv = { lcp: undefined, inp: undefined, cls: 0, inpSource: 'first-input', lcpFinalizedAtRead: true };
+window.__perfExt = { fcp: undefined, longTasks: [], inpEvents: [], interactionCount: 0 };
 
 try {
   new PerformanceObserver(function(list) {
@@ -40,6 +41,44 @@ try {
   }).observe({ type: 'largest-contentful-paint', buffered: true });
 } catch (e) {}
 
+try {
+  new PerformanceObserver(function(list) {
+    var entries = list.getEntries();
+    if (entries.length > 0) {
+      window.__perfExt.fcp = entries[entries.length - 1].startTime;
+    }
+  }).observe({ type: 'paint', buffered: true });
+} catch (e) {}
+
+try {
+  new PerformanceObserver(function(list) {
+    var entries = list.getEntries();
+    for (var i = 0; i < entries.length; i++) {
+      window.__perfExt.longTasks.push({
+        startTime: entries[i].startTime,
+        duration: entries[i].duration
+      });
+    }
+  }).observe({ type: 'longtask', buffered: true });
+} catch (e) {}
+
+try {
+  new PerformanceObserver(function(list) {
+    var entries = list.getEntries();
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].interactionId) {
+        window.__perfExt.inpEvents.push(entries[i]);
+        window.__perfExt.interactionCount++;
+        var latency = Math.max(0, entries[i].processingStart - entries[i].startTime);
+        if (window.__cwv.inp === undefined || latency > window.__cwv.inp) {
+          window.__cwv.inp = latency;
+          window.__cwv.inpSource = 'event';
+        }
+      }
+    }
+  }).observe({ type: 'event', buffered: true });
+} catch (e) {}
+
   // Capture INP (Note: requires user interaction; remains undefined in automated crawls).
   try {
     var inpEntries = [];
@@ -47,10 +86,12 @@ try {
     var entries = list.getEntries();
     for (var i = 0; i < entries.length; i++) {
       inpEntries.push(entries[i]);
+      if (window.__cwv.inpSource === 'event') continue; // Event observer handles it better if supported
       
-      var latency = entries[i].processingStart - entries[i].startTime;
+      var latency = Math.max(0, entries[i].processingStart - entries[i].startTime);
       if (window.__cwv.inp === undefined || latency > window.__cwv.inp) {
         window.__cwv.inp = latency;
+        window.__cwv.inpSource = 'first-input';
       }
     }
   }).observe({ type: 'first-input', buffered: true });
@@ -190,6 +231,27 @@ export class CrawlerService {
               req.encodedBodySize = sizes.responseBodySize;
             }
           } catch (e) {}
+
+          const contentType = response.headers()['content-type'];
+          if (contentType) {
+            req.mimeType = contentType.split(';')[0].trim();
+          }
+
+          const contentEncoding = response.headers()['content-encoding'];
+          if (contentEncoding) {
+            req.contentEncoding = contentEncoding;
+          }
+
+          const cacheControl = response.headers()['cache-control'];
+          const age = response.headers()['age'];
+          const xCache = response.headers()['x-cache'];
+          if (
+            (xCache && xCache.toLowerCase().includes('hit')) ||
+            (age && parseInt(age, 10) > 0) ||
+            (cacheControl && !cacheControl.includes('no-cache') && !cacheControl.includes('no-store'))
+          ) {
+            req.fromCache = true;
+          }
         }
       });
 
@@ -220,9 +282,10 @@ export class CrawlerService {
       await page.waitForTimeout(3000);
 
       const cwvRaw = await page.evaluate(() =>
-        JSON.stringify(
-          (window as any).__cwv || { lcp: undefined, inp: undefined, cls: 0 },
-        ),
+        JSON.stringify({
+          __cwv: (window as any).__cwv || { lcp: undefined, inp: undefined, cls: 0, inpSource: 'first-input', lcpFinalizedAtRead: true },
+          __perfExt: (window as any).__perfExt || { fcp: undefined, longTasks: [], inpEvents: [], interactionCount: 0 }
+        })
       );
       let cwv: {
         lcp?: number;
@@ -230,9 +293,21 @@ export class CrawlerService {
         cls?: number;
         fcp?: number;
         ttfb?: number;
+        inpSource?: string;
+        lcpFinalizedAtRead?: boolean;
       };
+      let perfExt: {
+        fcp?: number;
+        longTasks?: Array<{startTime: number; duration: number}>;
+        inpEvents?: any[];
+        interactionCount?: number;
+      };
+      
       try {
-        cwv = JSON.parse(cwvRaw);
+        const parsed = JSON.parse(cwvRaw);
+        cwv = parsed.__cwv;
+        perfExt = parsed.__perfExt;
+        
         if (cwv.inp === undefined) {
           this.logger.log(
             'INP not collected for ' +
@@ -241,14 +316,27 @@ export class CrawlerService {
           );
         }
       } catch {
-        cwv = { lcp: undefined, inp: undefined, cls: 0 };
+        cwv = { lcp: undefined, inp: undefined, cls: 0, inpSource: 'first-input', lcpFinalizedAtRead: true };
+        perfExt = { fcp: undefined, longTasks: [], inpEvents: [], interactionCount: 0 };
       }
 
-      // Get performance timings
       const performanceTiming = await page.evaluate(() =>
         JSON.stringify(window.performance.timing),
       );
       const parsedTiming = JSON.parse(performanceTiming);
+      
+      const navigationTimingRaw = await page.evaluate(() => {
+        const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        return JSON.stringify(nav ? { 
+          ttfb: nav.responseStart, 
+          domContentLoaded: nav.domContentLoadedEventEnd, 
+          loadEvent: nav.loadEventEnd, 
+          transferSize: nav.transferSize, 
+          protocol: nav.nextHopProtocol, 
+          serverTiming: nav.serverTiming 
+        } : null);
+      });
+      const navigationTiming = JSON.parse(navigationTimingRaw);
 
       const content = await page.content();
       const parsedTitle = await page.title();
@@ -272,6 +360,29 @@ export class CrawlerService {
           errors: []
         }));
       });
+
+      const renderBlockingRaw = await page.evaluate(() => {
+        const scripts = Array.from(document.querySelectorAll('script[src]'))
+          .filter(s => {
+            const hasAsync = s.hasAttribute('async');
+            const hasDefer = s.hasAttribute('defer');
+            const isModule = s.getAttribute('type') === 'module';
+            return !hasAsync && !hasDefer && !isModule;
+          })
+          .map(s => s.getAttribute('src'));
+
+        const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+          .filter(l => {
+            const media = l.getAttribute('media');
+            const isDisabled = l.hasAttribute('disabled');
+            const isNonBlockingMedia = media && media !== 'all' && media !== 'screen' && media !== 'print';
+            return !isDisabled && !isNonBlockingMedia;
+          })
+          .map(l => l.getAttribute('href'));
+
+        return JSON.stringify({ scripts, stylesheets });
+      });
+      const renderBlocking = JSON.parse(renderBlockingRaw);
 
       const headingHierarchy = await page.evaluate(() => {
         const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).map((h, index) => ({
@@ -302,9 +413,12 @@ export class CrawlerService {
         networkRequests,
         consoleMessages,
         performanceTiming: parsedTiming,
+        navigationTiming,
         sitemapInfo,
         robotsInfo,
         cwv,
+        __perfExt: perfExt,
+        renderBlocking,
         lighthouseData: undefined as any,
         mainHeaders,
         page,
@@ -322,7 +436,6 @@ export class CrawlerService {
           port,
           output: 'json',
           onlyCategories: [
-            'performance',
             'accessibility',
             'best-practices',
             'seo',
@@ -335,12 +448,10 @@ export class CrawlerService {
         }
 
         const categories = lhResult.lhr.categories;
+        this.logger.log('Lighthouse performance disabled (Playwright primary)');
         lighthouseData = {
           source: 'lighthouse',
-          performance:
-            categories.performance?.score != null
-              ? Math.round(categories.performance.score * 100)
-              : null,
+          performance: null,
           accessibility: Math.round(
             (categories.accessibility?.score ?? 0) * 100,
           ),
