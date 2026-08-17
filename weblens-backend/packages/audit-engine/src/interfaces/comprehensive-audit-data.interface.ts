@@ -1,25 +1,5 @@
-export interface PerfDetails {
-  loadTimeMs: number;
-  timing: any;
-  heavyResources: number;
-  budget?: {
-    totalSize?: number;
-    htmlSize?: number;
-    jsSize?: number;
-    cssSize?: number;
-    imageSize?: number;
-    totalTransferSize?: number;
-    totalRequestCount: number;
-  };
-  coreWebVitals?: {
-    lcp?: number;
-    cls?: number;
-    inp?: number;
-    ttfb?: number;
-    tbt?: number;
-    totalBlockingTime?: number;
-  };
-}
+import type { PerfDetails } from '@weblens/shared-types';
+export type { PerfDetails };
 
 export interface SeoDetails {
   title: string;

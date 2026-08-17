@@ -19,7 +19,13 @@ export interface PerfDetails {
   coreWebVitals?: {
     lcp?: number;
     cls?: number;
+    inp?: number;
+    fcp?: number;
+    ttfb?: number;
+    tbt?: number;
+    tbtSynthetic?: number;
     fid?: number;
+    totalBlockingTime?: number;
   };
 }
 

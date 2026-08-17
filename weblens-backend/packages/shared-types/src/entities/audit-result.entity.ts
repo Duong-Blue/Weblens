@@ -5,8 +5,8 @@ export interface ReferenceLink {
 }
 
 export interface PerfDetails {
-  loadTimeMs: number;
-  timing: any;
+  loadTimeMs?: number;
+  timing?: any;
   heavyResources: number;
   budget?: {
     totalSize?: number;
@@ -19,7 +19,13 @@ export interface PerfDetails {
   coreWebVitals?: {
     lcp?: number;
     cls?: number;
-    fid?: number;
+    inp?: number;
+    fcp?: number;
+    ttfb?: number;
+    tbt?: number;
+    tbtSynthetic?: number;
+    fid?: number; // legacy
+    totalBlockingTime?: number; // legacy
   };
 }
 
@@ -86,11 +92,20 @@ export interface SecurityDetails {
   vulnerabilities: { name: string; severity: string; description: string }[];
 }
 
+export interface TechItem {
+  name: string;
+  category: string;
+  confidence: number;
+  version?: string;
+  isDeprecated: boolean;
+}
+
 export interface TechStack {
-  frameworks: string[];
-  cms: string[];
-  hosting: string[];
-  analytics: string[];
+  frameworks?: TechItem[];
+  cms?: TechItem[];
+  hosting?: TechItem[];
+  analytics?: TechItem[];
+  [key: string]: TechItem[] | undefined;
 }
 
 export interface NetworkDetails {

@@ -332,6 +332,14 @@ export interface CrawlResult {
   }>;
 
   performanceTiming: any;
+  navigationTiming?: {
+    ttfb?: number;
+    domContentLoaded?: number;
+    loadEvent?: number;
+    transferSize?: number;
+    protocol?: string;
+    serverTiming?: any[];
+  };
   resourceTiming?: Array<{
     name: string;
     entryType: string;
@@ -350,7 +358,27 @@ export interface CrawlResult {
     responseStart: number;
     responseEnd: number;
   }>;
-  cwv: { lcp?: number; inp?: number; cls?: number; fcp?: number; ttfb?: number };
+  cwv: { 
+    lcp?: number; 
+    inp?: number; 
+    cls?: number; 
+    fcp?: number; 
+    ttfb?: number; 
+    fid?: number; 
+    totalBlockingTime?: number;
+    inpSource?: string;
+    lcpFinalizedAtRead?: boolean;
+  };
+  __perfExt?: {
+    fcp?: number;
+    longTasks?: Array<{startTime: number; duration: number}>;
+    inpEvents?: any[];
+    interactionCount?: number;
+  };
+  renderBlocking?: {
+    scripts: string[];
+    stylesheets: string[];
+  };
   longTasks?: Array<{
     duration: number;
     startTime: number;
