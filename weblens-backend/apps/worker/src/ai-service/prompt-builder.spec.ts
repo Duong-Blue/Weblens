@@ -62,6 +62,9 @@ describe('prompt-builder', () => {
   it('should output a string less than 2000 characters for typical data', () => {
     const prompt = buildPrompt(mockComprehensiveAuditData);
     expect(typeof prompt).toBe('string');
+    expect(prompt).toContain('1200');
+    expect(prompt).toContain('0.05');
+    expect(prompt).toContain('45');
     expect(prompt.length).toBeLessThan(2000);
   });
 

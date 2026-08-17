@@ -31,6 +31,7 @@ describe('Audit Flow (e2e)', () => {
 
   const mockRedisService = {
     getClient: jest.fn().mockReturnValue(mockRedisClient),
+    getAuditResult: jest.fn().mockResolvedValue(null),
     onModuleDestroy: jest.fn(),
     onModuleInit: jest.fn(),
   };
@@ -82,5 +83,53 @@ describe('Audit Flow (e2e)', () => {
       url: expectedUrl,
       anonymous: true,
     }, expect.any(Object));
+  });
+
+  it('GET /audits/:id/result - should return perfDetails correctly formatted', async () => {
+    const mockedResult = {
+      id: 'audit-123',
+      url: 'https://example.com',
+      status: 'completed',
+      perfScore: 90,
+      perfDetails: {
+        loadTimeMs: 1200,
+        coreWebVitals: {
+          lcp: 1500,
+          cls: 0.05,
+          inp: 100,
+          fcp: 800,
+          ttfb: 300,
+          tbt: 50,
+          tbtSynthetic: true
+        },
+        heavyResources: 0,
+        budget: []
+      },
+      performanceIssues: [
+        { id: 'PERF-LCP-00', ruleId: 'PERF-LCP-00', status: 'pass' },
+        { id: 'PERF-CLS-01', ruleId: 'PERF-CLS-01', status: 'fail' }
+      ],
+      performanceOpportunities: [
+        { id: 'PERF-RES-JS', ruleId: 'PERF-RES-JS', status: 'warning' }
+      ],
+      referenceLinks: [
+        { title: 'web.dev: CLS', url: 'https://web.dev/articles/cls', category: 'performance' }
+      ]
+    };
+
+    mockRedisService.getAuditResult.mockResolvedValueOnce(mockedResult);
+
+    const response = await request(app.getHttpServer())
+      .get('/audits/audit-123/result')
+      .expect(200);
+
+    const result = response.body.result;
+    expect(result.perfDetails.coreWebVitals.lcp).toBe(1500);
+    expect(result.perfScore).toBe(90);
+    expect(result.performanceIssues.length).toBeGreaterThan(0);
+    expect(result.performanceOpportunities.length).toBeGreaterThan(0);
+    expect(result.performanceIssues).not.toEqual(expect.arrayContaining([expect.objectContaining({ id: 'PERF-RES-JS' })]));
+    
+    expect(result.referenceLinks.filter((l: any) => l.category === 'performance').length).toBeGreaterThan(0);
   });
 });

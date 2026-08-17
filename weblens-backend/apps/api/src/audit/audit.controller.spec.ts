@@ -44,7 +44,7 @@ describe('AuditController', () => {
       const response = await controller.getAuditResult(mockId);
 
       expect(response).toEqual({
-        audit: { id: mockId, status: 'completed', url: 'https://example.com' },
+        audit: { id: mockId, status: 'completed' },
         result: mockResult,
       });
       expect(redisService.getAuditResult).toHaveBeenCalledWith(mockId);

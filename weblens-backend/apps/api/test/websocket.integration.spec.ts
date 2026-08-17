@@ -39,7 +39,7 @@ describe('WebSocket Integration (e2e)', () => {
       appGateway.server.emit = jest.fn();
     }
 
-    const QueueEventsMock = (QueueEvents as jest.Mock).mock.results[0].value;
+    const QueueEventsMock = (QueueEvents as unknown as jest.Mock).mock.results[0].value;
     mockQueueEventsOn = QueueEventsMock.on;
   });
 

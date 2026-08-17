@@ -12,8 +12,10 @@ export class IssueFactory {
     category: string,
     impact: string,
     evidence: Evidence[],
-    recommendation?: string
+    recommendation?: string,
+    score?: number
   ): AuditIssue {
+    const finalScore = score !== undefined ? score : (status === 'pass' ? 100 : 0);
     return {
       id: `${engine.toUpperCase()}-${ruleId}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       ruleId,
@@ -22,7 +24,7 @@ export class IssueFactory {
       description,
       severity,
       status,
-      score: status === 'pass' ? 100 : 0,
+      score: finalScore,
       weight,
       category,
       impact,
